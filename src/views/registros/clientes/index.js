@@ -23,9 +23,13 @@ import moment from "moment";
 import {LoadingButton} from "@mui/lab";
 import Rol from "../../../Models/Rol";
 import Vehiculos from "../../../Models/Vehiculos";
+import Routers from "../../../Models/Routers";
+import {useAuthContext} from "../../../auth/useAuthContext";
+import Usuario from "../../../Models/Usuario";
 
 
 const Cliente = () => {
+    const {sesion}= useAuthContext()
     const [data, setData] = useState([])
     const [config, setConfig] = useState({isOpen: false})
     const [cliente, setCliente] = useState({})
@@ -37,8 +41,9 @@ const Cliente = () => {
     const [dataVenta, setDataVenta]= useState([])
     const [vehiculo, setVehiculo]= useState({})
     const [clienteCollapse, setClienteCollapse]= useState({})
-    const [vehiculoSelect, selectVehiculo, setVehiculoSelect]= useAsyncSelect({
-        labelPlace:'Vehiculo', modelo: {Model:Vehiculos, respuesta: 'vehiculosParaUso', getByParam: 'vehiculosParaUso'},
+    const [router, setRouter]= useState({})
+    const [routerSelect, selectRouter, setRouterSelect]= useAsyncSelect({
+        labelPlace:'Router', modelo: {Model:Routers, respuesta: 'routersParam', getByParam: 'getByParam'},
     })
     const [venta, selectVenta, setVenta,,setOptionsVenta]=useSelect({
         placeholder:'Tipo de venta'
@@ -49,6 +54,20 @@ const Cliente = () => {
     const [fechaInicio, inputFechaInicio, setFechaInicio]= useInput({
         typeState: 'date', placeholder: 'Fecha Contrato', initialState: moment().format('YYYY-MM-DD')
     })
+    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario]= useSelect({
+        placeholder:'Vendedor'
+    })
+    useEffect(() => {
+        Usuario.usuarios(0, 1000)
+            .then(response => {
+                const {usuarios} = response.data.listaUsuarios.data
+                const options=[]
+                for(const element of usuarios){
+                    options.push({value: element.id, label: `${element.nombres} ${element.apellidos}`})
+                }
+                setOptionsUsuario(options)
+            })
+    }, [])
     useEffect(()=>{
        Rol.getListTipoVentaVehiculo()
            .then(response=>{
@@ -75,6 +94,10 @@ const Cliente = () => {
         setCliente(row)
         setConfig({...config, isOpen: true})
     }
+    const editRouter=(row)=>{
+        setRouter(row)
+        setConfigColapse(true)
+    }
     const rowCollapse = (row) => {
         setClienteCollapse(row)
         const dataRow= row.data??[]
@@ -88,13 +111,44 @@ const Cliente = () => {
                         style={{margin: 3}}
                         onClick={()=>setConfigColapse(true)}
                     >
-                        <Icon icon="mdi:plus-circle"/> Nuevo Vehiculo
+                        <Icon icon="mdi:plus-circle"/> Nuevo Router
                     </Button>
                 </Box>
                 <ReactTablePagination data={dataRow}  columns={[
                     {
-                        header: 'Placa',
-                        accessor: 'placa',
+                        header: 'Acciones',
+                        buttons: [
+                            {
+                                icon: 'mdi:account-edit',
+                                onClick: (div) => editRouter(div), color: "warning"
+                            },
+                        ],
+                        align: "center",
+
+                    },
+                    {
+                        header: 'IMEI',
+                        accessor: 'imei',
+                        align: "center",
+                    },
+                    {
+                        header: 'Serie',
+                        accessor: 'serie',
+                        align: "center",
+                    },
+                    {
+                        header: 'SIM-CARD',
+                        accessor: 'numero_chip',
+                        align: "center",
+                    },
+                    {
+                        header: 'Marca',
+                        accessor: 'marca',
+                        align: "center",
+                    },
+                    {
+                        header: 'Modelo',
+                        accessor: 'modelo',
                         align: "center",
                     },
                     {
@@ -257,12 +311,12 @@ const Cliente = () => {
             />
             <Dialog open={configColapse} fullWidth>
                 <DialogTitle>
-                    {vehiculo?.id ? 'Editar Vehiculo' : 'Registar Vehiculo'}
+                    {vehiculo?.id ? 'Editar Router' : 'Registar Router'}
                 </DialogTitle>
                 <DialogContent style={{paddingTop: 8}}>
                     <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
                         <FormControl style={{flex: 1}}>
-                            {selectVehiculo}
+                            {selectRouter}
                         </FormControl>
                         <FormControl style={{flex: 2}}>
                             {selectVenta}
@@ -271,6 +325,12 @@ const Cliente = () => {
                     <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
                         {inputMonto}
                         {inputFechaInicio}
+                    </Stack>
+                    <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5, display:sesion?.rol?.id === 'd10503e9-847b-48d6-a9ff-a0f182974300'? '': 'none'}} spacing={2}>
+                        <FormControl style={{flex: 1}}>
+                            {selectUsuario}
+                        </FormControl>
+                        <FormControl style={{flex: 2}}/>
                     </Stack>
                 </DialogContent>
                 <DialogActions>

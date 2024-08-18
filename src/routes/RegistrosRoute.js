@@ -6,6 +6,7 @@ import AuthGuard from "../auth/AuthGuard";
 const ClientesPage= Loadable(lazy(()=>import('views/registros/clientes')))
 const RastreadorPage= Loadable(lazy(()=>import('views/registros/gps')))
 const VehiculoPage= Loadable(lazy(()=>import('views/registros/vehiculos')))
+const RoutePage= Loadable(lazy(()=>import('views/registros/routes')))
 
 const RegistrosRoute={
     path:'/registro',
@@ -18,6 +19,10 @@ const RegistrosRoute={
         {
             path: 'gps',
             element: <RastreadorPage/>
+        },
+        {
+            path: 'routers',
+            element: <RoutePage/>
         },
         {
             path: 'vehiculo',

@@ -1,4 +1,4 @@
-import {IconUserPlus, IconGps, IconCar} from '@tabler/icons'
+import {IconUserPlus, IconWifi2, IconCashBanknote} from '@tabler/icons'
 const registro={
     id: 'registro',
     title: 'Registros',
@@ -13,19 +13,19 @@ const registro={
             breadcrumbs: false
         },
         {
-            id:'admin-gps',
-            title: 'GPS',
+            id:'admin-routers',
+            title: 'Routers',
             type: 'item',
-            url: '/registro/gps',
-            icon: IconGps,
+            url: '/registro/routers',
+            icon: IconWifi2,
             breadcrumbs: false
         },
         {
-            id:'admin-vehiculo',
-            title: 'Vehiculos',
+            id:'admin-ventas',
+            title: 'Ventas',
             type: 'item',
-            url: '/registro/vehiculo',
-            icon: IconCar,
+            url: '/registro/routers',
+            icon: IconCashBanknote,
             breadcrumbs: false
         }
     ]

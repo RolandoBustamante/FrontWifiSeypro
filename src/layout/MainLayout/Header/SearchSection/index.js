@@ -75,7 +75,6 @@ const SearchSection = () => {
   const [sedeActual, setSedeActual]= useState({})
   useEffect(()=>{
     if(sesion){
-      console.log(sesion)
       setSedeActual(sesion.sedes.find(element=>element.id===sesion.sede_seleccionada))
     }
   },[sesion])

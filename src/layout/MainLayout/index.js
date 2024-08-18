@@ -17,6 +17,8 @@ import { SET_MENU } from 'store/actions';
 // assets
 import { IconChevronRight } from '@tabler/icons';
 import PropTypes from 'prop-types';
+import {useAuthContext} from "../../auth/useAuthContext";
+import {useEffect, useState} from "react";
 
 
 // styles
@@ -56,7 +58,13 @@ const MainLayout = ({viewHeader= false}) => {
     MainLayout.propTypes={
         viewHeader: PropTypes.bool
     }
-  const theme = useTheme();
+    const [navegacion, setNavegacion]= useState(navigation)
+    const { sesion } = useAuthContext();
+    useEffect(()=>{
+        if (sesion?.rol?.id !== 'd10503e9-847b-48d6-a9ff-a0f182974300') setNavegacion({items: navigation.items.filter(element=>element.id!=="admin")})
+    },[sesion])
+
+    const theme = useTheme();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
   // Handle left drawer
   const leftDrawerOpened = useSelector((state) => state.customization.opened);
@@ -90,7 +98,7 @@ const MainLayout = ({viewHeader= false}) => {
       {/* main content */}
       <Main theme={theme} open={leftDrawerOpened}>
         {/* breadcrumb */}
-          {viewHeader&& <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign />}
+          {viewHeader&& <Breadcrumbs separator={IconChevronRight} navigation={navegacion} icon title rightAlign />}
         <Outlet />
       </Main>
       <Customization />
