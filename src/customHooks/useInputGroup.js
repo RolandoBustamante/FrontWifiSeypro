@@ -64,7 +64,7 @@ export default function useInputPass({
                 }}
                 endAdornment={
                     <InputAdornment position="end">
-                        <IconButton
+                        {!disabled&&<IconButton
                             aria-label="toggle password visibility"
                             onClick={onClick}
                             onMouseDown={handleMouseDownPassword}
@@ -72,7 +72,7 @@ export default function useInputPass({
                             size="large"
                         >
                             {icon}
-                        </IconButton>
+                        </IconButton>}
                     </InputAdornment>
                 }
                 label={placeholder}

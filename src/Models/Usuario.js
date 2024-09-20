@@ -93,7 +93,7 @@ const Usuario = {
     allSedes: ()=>{
         const query=gql(`
                query allSedes {
-            allSedes{id, nombre}
+            allSedes{id, nombre, codigo, almacen}
           }
         `)
         return client.query({query, fetchPolicy: 'no-cache'})

@@ -25,7 +25,11 @@ export default function useSelect({
     };
     const selectElement = (
         <FormControl fullWidth>
-            <InputLabel id="select-label" style={{color: value || isMenuOpen ? 'black' : 'rgba(0, 0, 0, 0.54)'}}>
+            <InputLabel
+                id="select-label"
+                shrink={value || isMenuOpen ? true : null}
+                style={{ color: value || isMenuOpen ? 'black' : 'rgba(0, 0, 0, 0.54)' }}
+            >
                 {placeholder}
             </InputLabel>
             <Select

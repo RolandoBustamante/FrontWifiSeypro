@@ -26,6 +26,8 @@ import Vehiculos from "../../../Models/Vehiculos";
 import Routers from "../../../Models/Routers";
 import {useAuthContext} from "../../../auth/useAuthContext";
 import Usuario from "../../../Models/Usuario";
+import Label from "../../../components/label";
+import Vendedores from "../../../Models/Vendedores";
 
 
 const Cliente = () => {
@@ -54,20 +56,18 @@ const Cliente = () => {
     const [fechaInicio, inputFechaInicio, setFechaInicio]= useInput({
         typeState: 'date', placeholder: 'Fecha Contrato', initialState: moment().format('YYYY-MM-DD')
     })
-    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario]= useSelect({
-        placeholder:'Vendedor'
+    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario]= useAsyncSelect({
+        labelPlace:'Vendedor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
     })
-    useEffect(() => {
-        Usuario.usuarios(0, 1000)
-            .then(response => {
-                const {usuarios} = response.data.listaUsuarios.data
-                const options=[]
-                for(const element of usuarios){
-                    options.push({value: element.id, label: `${element.nombres} ${element.apellidos}`})
-                }
-                setOptionsUsuario(options)
-            })
-    }, [])
+    const colorState = {
+        ACTIVO: 'success',
+        BLOQUEADO: 'error',
+        INACTIVO: 'error',
+    };
+    useEffect(()=>{
+
+    },[routerSelect,venta, monto, fechaInicio, usuario ])
+
     useEffect(()=>{
        Rol.getListTipoVentaVehiculo()
            .then(response=>{
@@ -149,29 +149,6 @@ const Cliente = () => {
                     {
                         header: 'Modelo',
                         accessor: 'modelo',
-                        align: "center",
-                    },
-                    {
-                        header: 'Tipo Vehículo',
-                        Cell: (row) => {
-                            const {tipo} = row
-                            const nombre = tipo.nombre ?? ''
-                            return (<div>{nombre}</div>)
-                        },
-                        align: "center",
-                    },
-                    {
-                        header: 'Marca',
-                        Cell: (row) => {
-                            const {marca} = row
-                            const nombre = marca.nombre ?? ''
-                            return (<div>{nombre}</div>)
-                        },
-                        align: "center",
-                    },
-                    {
-                        header: 'Color',
-                        accessor: 'color',
                         align: "center",
                     },
                     {
@@ -262,6 +239,12 @@ const Cliente = () => {
                             header: 'Estado',
                             accessor: 'estado',
                             align: "center",
+                            Cell: (row)=>{
+                                const {estado}= row
+                                return <Label variant="soft" color={colorState[estado.toUpperCase()]} sx={{textTransform: 'capitalize'}}>
+                                    {estado}
+                                </Label>
+                            }
                         },
                         {
                             header: 'DNI',
@@ -327,10 +310,10 @@ const Cliente = () => {
                         {inputFechaInicio}
                     </Stack>
                     <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5, display:sesion?.rol?.id === 'd10503e9-847b-48d6-a9ff-a0f182974300'? '': 'none'}} spacing={2}>
-                        <FormControl style={{flex: 1}}>
+                        <FormControl style={{flex: 4}}>
                             {selectUsuario}
                         </FormControl>
-                        <FormControl style={{flex: 2}}/>
+                        <FormControl style={{flex: 1}}/>
                     </Stack>
                 </DialogContent>
                 <DialogActions>

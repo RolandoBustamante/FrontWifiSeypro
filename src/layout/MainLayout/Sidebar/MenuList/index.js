@@ -12,7 +12,6 @@ const MenuList = () => {
   const { sesion } = useAuthContext();
   let items= menuItem.items
   if(sesion?.rol?.id !== 'd10503e9-847b-48d6-a9ff-a0f182974300') items= items.filter(element=>element.id!=="admin")
-  console.log(items)
   const navItems = items.map((item) => {
     switch (item.type) {
       case 'group':

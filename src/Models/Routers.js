@@ -1,7 +1,6 @@
 import {gql} from '@apollo/client';
 
 import apollo from '../utils/apollo';
-import moment from "moment";
 
 const client = apollo;
 
@@ -19,7 +18,8 @@ const Routers={
     createOrUpdateRouters: (data)=>{
         const mutation=gql(`mutation createOrUpdateRouters($data: JSONObject!){
             createOrUpdateRouters(data: $data){
-                id, imei, nombre, marca, modelo, serie, numero_chip, sede_id, fecha_compra, fecha_renovacion
+                id, imei, marca, modelo, sede_id, fecha_compra, 
+                chips{id, paquete, fecha_renovacion, marca, activo, usado, sim_card}
             }
         }`)
         return client.mutate({mutation, variables:{data}, fetchPolicy: 'no-cache'})
@@ -43,6 +43,16 @@ const Routers={
         }
         `)
         return client.query({query,variables:{param}, fetchPolicy: 'no-cache'})
-    }
+    },
+    obtenerCodigo: ()=>{
+        const query= gql(`
+        query obtenerCodigoPago{
+            obtenerCodigoPago{
+                label
+            }
+        }
+        `)
+        return client.query({query, fetchPolicy: 'no-cache'})
+    },
 }
 export default Routers

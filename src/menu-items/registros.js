@@ -1,4 +1,4 @@
-import {IconUserPlus, IconWifi2, IconCashBanknote} from '@tabler/icons'
+import {IconUserPlus, IconWifi2, IconCashBanknote, IconDeviceSim} from '@tabler/icons'
 const registro={
     id: 'registro',
     title: 'Registros',
@@ -18,6 +18,14 @@ const registro={
             type: 'item',
             url: '/registro/routers',
             icon: IconWifi2,
+            breadcrumbs: false
+        },
+        {
+            id:'admin-sims',
+            title: 'SIM-CARDS',
+            type: 'item',
+            url: '/registro/sims',
+            icon: IconDeviceSim,
             breadcrumbs: false
         },
         {

@@ -4,8 +4,7 @@ import {Box, Button, Card, CardContent, Container} from "@mui/material";
 import {Icon} from "@iconify/react";
 import Usuario from "../../../Models/Usuario";
 import Routers from "../../../Models/Routers";
-import ModalRoute from "./components/ModalGPS";
-import moment from "moment";
+import ModalRoute from "./components/ModalRoute";
 
 
 const Rastreador = () => {
@@ -112,19 +111,6 @@ const Rastreador = () => {
                             accessor: 'fecha_compra',
                             align: "center",
                         },
-                        {
-                            header: 'Fecha renovación',
-                            Cell: (row) => {
-                                let {fecha_renovacion} = row
-                                const diaActual=moment().format('DD')
-                                fecha_renovacion= moment(fecha_renovacion, 'YYYY-MM-DD').format('DD')
-                                if(Number(diaActual)<=Number(fecha_renovacion))
-                                    fecha_renovacion= `${moment().format("YYYY-MM")}-${fecha_renovacion}`
-                                else fecha_renovacion= `${moment().add(1, 'month').format("YYYY-MM")}-${fecha_renovacion}`
-                                return (<div>{fecha_renovacion}</div>)
-                            },
-                            align: "center",
-                        }
                     ]}/>
                 </CardContent>
             </Card>

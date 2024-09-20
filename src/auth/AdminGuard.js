@@ -7,6 +7,8 @@ import Login from '../views/pages/authentication/authentication3/Login3';
 import { useAuthContext } from './useAuthContext';
 import LoadingScreen from "../components/loading-screen";
 import Sede from "../views/selectSede/Sede";
+import Default from "../views/dashboard/Default";
+
 
 // ----------------------------------------------------------------------
 
@@ -41,7 +43,7 @@ export default function AdminGuard({ children }) {
         return <Navigate to={requestedLocation} />;
     }
     if(sesion?.rol?.id!=='d10503e9-847b-48d6-a9ff-a0f182974300'){
-        return <Sede/>
+        return <Default />
     }
 
     return <> {children} </>;
