@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import {useEffect, useState} from "react";
 import useInput from "../../../../../customHooks/useInput";
 import useSelect from "../../../../../customHooks/useSelect";
-import useSelectSearch from "../../../../../customHooks/useSelectSearch";
 import Toast from "../../../../../utils/toastUtil";
 import Gps from "../../../../../Models/Gps";
 import Vehiculos from "../../../../../Models/Vehiculos";
@@ -35,13 +34,13 @@ const ModalVehiculo = ({config, vehiculo, setConfig, setData}) => {
     const [color, inputColor, setColor] = useInput({
         typeState: 'text', placeholder: 'Color'
     })
-    const [sede, selectSede, setSede, setInvalidSedes, setOptionSedes, , invalidSede] = useSelect({
+    const [sede, selectSede, setSede, setInvalidSedes, setOptionSedes, , ] = useSelect({
         placeholder: 'Sede'
     })
-    const [comentario, inputComentario, setComentario] = useInput({
+    const [, inputComentario, ] = useInput({
         typeState: 'text', placeholder: 'Comentario'
     })
-    const [gps, selectGps, setGps, , setOptionsGps, , , optionsGps] = useAsyncSelect({
+    const [gps, selectGps, setGps, , setOptionsGps, , , ] = useAsyncSelect({
         labelPlace: 'Rastreador', modelo: {Model: Gps, respuesta: 'gpsParam'}
     })
     const [otrosGps, setOtrosGps]= useState([])

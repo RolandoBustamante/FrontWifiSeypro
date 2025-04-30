@@ -26,6 +26,14 @@ const Rol={
         const query= gql(`query listTipoVentaVehiculo {
          listTipoVentaVehiculo{id, nombre, color}}`)
         return client.query({query, fetchPolicy: 'no-cache'})
-    }
+    },
+    createOrUpdateRol: (data)=>{
+        const mutation=gql(`mutation createOrUpdateRol($data: JSONObject!){
+            createOrUpdateRol(data: $data){
+                id, descripcion, nombre, accesos
+            }
+        }`)
+        return client.mutate({mutation, variables:{data}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Rol

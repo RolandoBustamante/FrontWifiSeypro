@@ -5,7 +5,6 @@ export default function useAsyncSelect({
                                            initialState = "",
                                            optionsState = [],
                                            initialMessage = "",
-                                           isClearable,
                                            noOptions = "Escriba para buscar",
                                            modelo = {}, labelPlace = "", disabled = false
                                        }) {
@@ -15,9 +14,17 @@ export default function useAsyncSelect({
     const [message, setMessage] = useState(initialMessage)
     const [textValue, setTextValue] = useState('')
     const [dis, setDisabled] = useState(disabled)
+    const [time, setTime]= useState(0)
+    useEffect(()=>{
+        if(time===0) return
+        setTimeout(()=>{
+            setTime(0)
+        },time*1000)
+    },[time])
 
     useEffect(() => {
         if (!textValue && textValue === '') return
+        if(time>0) return
         const {Model, respuesta, table, getByParam} = modelo
         const getByParamFunc = getByParam || 'getByParam'
         const query = table ? {table, param: textValue} : textValue
@@ -31,7 +38,7 @@ export default function useAsyncSelect({
                     })
             },
             500)
-    }, [textValue, modelo])
+    }, [textValue, modelo, time])
     const renderOption = (props, option) => (
         <li {...props}>
             <Typography variant="body2">{option.label}</Typography>
@@ -56,7 +63,10 @@ export default function useAsyncSelect({
                         label={labelPlace}
                         disabled={disabled}
                         onChange={({target}) => {
-                            if (target.value && target.value.length > 1) setTextValue(target.value)
+                            if (target.value && target.value.length > 1) {
+                                setTextValue(target.value)
+                                setTime(2)
+                            }
                         }}
                         error={invalid}
                         helperText={invalid ? message : null}

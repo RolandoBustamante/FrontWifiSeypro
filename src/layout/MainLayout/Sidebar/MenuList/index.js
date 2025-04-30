@@ -5,13 +5,19 @@ import { Typography } from '@mui/material';
 import NavGroup from './NavGroup';
 import menuItem from 'menu-items';
 import {useAuthContext} from "../../../../auth/useAuthContext";
+import navigation from "../../../../menu-items";
+import {filtrarMenuConAccesos} from "../../../../utils/utils";
 
 // ==============================|| SIDEBAR MENU LIST ||============================== //
 
 const MenuList = () => {
   const { sesion } = useAuthContext();
   let items= menuItem.items
-  if(sesion?.rol?.id !== 'd10503e9-847b-48d6-a9ff-a0f182974300') items= items.filter(element=>element.id!=="admin")
+  if (sesion?.rol?.id === 'd10503e9-847b-48d6-a9ff-a0f182974300')
+    items= menuItem.items
+  else items= filtrarMenuConAccesos(navigation.items, sesion?.rol?.accesos)
+
+
   const navItems = items.map((item) => {
     switch (item.type) {
       case 'group':

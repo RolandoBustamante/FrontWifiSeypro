@@ -13,10 +13,13 @@ function useRadioButtons(initialValue, options, placeholder,disabled) {
                     >
                         <input
                             type="radio"
-                            id={option.value}
+                            id={option.value.toString()}
                             value={option.value}
                             checked={selectedOption === option.value}
-                            onChange={(event) => setSelectedOption(event.target.value)}
+                            onChange={(event) => {
+                                const value = event.target.value === 'true';
+                                setSelectedOption(value);
+                            }}
                             disabled={disabled}
                         />
                         <label htmlFor={option.value} style={{ marginLeft: 5 }}>

@@ -4,7 +4,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControl,
+    FormControl, IconButton,
     Stack,
     Table, TableBody, TableCell, TableHead, TableRow,
     Typography
@@ -19,10 +19,12 @@ import {useAuthContext} from "../../../../auth/useAuthContext";
 import moment from "moment/moment";
 import {useEffect, useState} from "react";
 import Routers from "../../../../Models/Routers";
-import {cadenaAleatoria} from "../../../../utils/utils";
+import {cadenaAleatoria, uploadImg} from "../../../../utils/utils";
 import {Icon} from "@iconify/react";
 import ItemsSims from "./ItemsSims";
 import useInputGroup from "../../../../customHooks/useInputGroup";
+import MyDropzone from "../../../../components/MyDropzone";
+import DocumentViewer from "../../../../components/DocumentosViewer";
 
 const ModalRoute = ({config, router, setConfig, setData}) => {
     const {sesion} = useAuthContext()
@@ -33,7 +35,7 @@ const ModalRoute = ({config, router, setConfig, setData}) => {
         setData: PropTypes.func
     }
     const [disabledSave, setDisabledSave] = useState(false)
-    const [codigo, inputCodigo, setCodigo, setInvalidCodigo] = useInputGroup({
+    const [codigo, inputCodigo, setCodigo, setInvalidCodigo, , , setIsDisabledCodigo] = useInputGroup({
         placeholder: "Código de pago", onClick: () => {
             setCodigo('')
             Toast.Waiting('Buscando...')
@@ -60,17 +62,18 @@ const ModalRoute = ({config, router, setConfig, setData}) => {
         placeholder: "Fecha de Compra", typeState: 'date', initialState: moment().format('YYYY-MM-DD')
     })
     const [precio, inputPrecio, setPrecio, setInvalidPrecio, ,] = useInput({
-        placeholder: "Precio Servicio (S/.)", disabled: true, typeState: 'number'
+        placeholder: "Precio Servicio (S/.)", typeState: 'number'
     })
     const [detalle, setDetalle] = useState([]);
     const [views, setViews] = useState([]);
     const [bloquear, setBloquear] = useState(false)
     const [invalidSims, setInvalidSims] = useState(false)
+    const [nombre_file, setNombreFile] = useState(null)
 
     const save = async () => {
         Toast.Waiting('Guardando...')
         let object = {
-            imei, marca, modelo, sede_id: sede,
+            imei, marca, modelo, sede_id: sede, nombre_file,
             fecha_compra: fecha, chips: views, codigo, precio_servicio: String(precio)
         }
         if (router.id) object = {...object, id: router.id}
@@ -113,6 +116,7 @@ const ModalRoute = ({config, router, setConfig, setData}) => {
         setFecha(router.fecha_compra ?? moment().format('YYYY-MM-DD'))
         setPrecio(router.precio_servicio ?? '')
         setCodigo(router.codigo ?? '')
+        setIsDisabledCodigo(!!router.codigo)
         setViews([])
         setDetalle([])
         if (router.chips) {
@@ -159,7 +163,23 @@ const ModalRoute = ({config, router, setConfig, setData}) => {
         setInvalidSims(invalidSave)
         setBloquear(!invalidActivo)
     }, [views])
+    const onDrop = accepted => {
+        uploadImg(accepted[0], 'multimedia', null)
+            .then(response => response.json())
+            .then(({data}) => {
+                setNombreFile(data.name)
+            })
+            .catch(({message}) => {
+                Toast.Error(message, {autoClose: 4000})
+            })
+    }
+    const [documentos, setDocumentos] = useState([])
+    const [configView, setConfigView] = useState(false)
 
+    const handleIconClick = (nombre, url) => {
+        setDocumentos([{nombre, url}])
+        setConfigView(true)
+    }
 
     return (
         <Dialog open={config.isOpen} fullWidth
@@ -195,7 +215,44 @@ const ModalRoute = ({config, router, setConfig, setData}) => {
                     <FormControl style={{flex: 1}}>
                         {selectSede}
                     </FormControl>
-
+                </Stack>
+                <Stack direction={{xs: 'column', sm: 'row'}}
+                       style={{paddingBottom: 10, paddingTop: 5, paddingLeft: 25, paddingRight: 25}}>
+                    <FormControl style={{
+                        flex: 2,
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        paddingLeft: 20,
+                        paddingRight: 20
+                    }}>
+                        <Stack direction={{xs: 'column', sm: 'row'}}
+                               style={{paddingBottom: 10, paddingTop: 5, paddingLeft: 10, paddingRight: 10}}
+                               spacing={2}>
+                            <FormControl style={{flex: 14}}>
+                                <MyDropzone onDrop={onDrop} placeholder="Foto Router"/>
+                            </FormControl>
+                            {router?.id_file && <FormControl style={{flex: 1, paddingTop: '2%'}}>
+                                <IconButton
+                                    title="Ver detalle"
+                                    component="label"
+                                    onClick={() => handleIconClick(`Router ${router.imei}`, router.id_file)}
+                                    style={{
+                                        padding: 0,
+                                        margin: 0,
+                                    }}
+                                >
+                                    <Icon
+                                        icon="mdi:eye"
+                                        title="Ver detalle"
+                                        style={{
+                                            fontSize: 18,
+                                            color: 'inherit'
+                                        }}
+                                    />
+                                </IconButton>
+                            </FormControl>}
+                        </Stack>
+                    </FormControl>
                 </Stack>
                 <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
                     <FormControl style={{flex: 3, border: '1px solid #ccc', borderRadius: '8px', padding: '10px'}}>
@@ -280,6 +337,7 @@ const ModalRoute = ({config, router, setConfig, setData}) => {
                     Cancelar
                 </Button>
             </DialogActions>
+            <DocumentViewer config={configView} setConfig={setConfigView} documentos={documentos}/>
         </Dialog>
     )
 }

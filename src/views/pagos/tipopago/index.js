@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from "react"
 import ReactTablePagination from "../../../utilsComponents/CustomTable";
 import Toast from "../../../utils/toastUtil";
+import { Grid } from '@mui/material';
 
 import {
     Box,
     Button, Card, CardContent,
-    Container,
     FormControl, IconButton,
     Stack,
 } from "@mui/material";
@@ -15,6 +15,7 @@ import Label from "../../../../src/components/label";
 import TipoVenta from "../../../Models/TipoVenta";
 import useRadioButtons from "../../../customHooks/useRadioButtons";
 import useMyDialog from "../../../customHooks/useMyDialog";
+import {gridSpacing} from "../../../store/constant";
 
 
 const TipoPago = () => {
@@ -27,8 +28,8 @@ const TipoPago = () => {
         typeState: 'text', placeholder: 'Tipo de Pago'
     })
     const [selectedOption, RadioButtons, setRadio] = useRadioButtons('true', [
-        {label: 'SI', value: 'true'},
-        {label: 'NO', value:'false'}
+        {label: 'SI', value: true},
+        {label: 'NO', value:false}
     ], 'Bancarizado')
     useEffect(() => {
         setLoading(true)
@@ -41,7 +42,7 @@ const TipoPago = () => {
     }, [])
     useEffect(() => {
         setTipo(tipoVenta.nombre ?? '')
-        setRadio(tipoVenta.bancarizado !==null?`${tipoVenta.bancarizado}`:'true')
+        setRadio(tipoVenta.bancarizado ??false)
     }, [tipoVenta])
 
     const editarTipo = (row) => {
@@ -49,7 +50,7 @@ const TipoPago = () => {
     }
     const activarEliminarSolicitud = (row) => {
         const {activo} = row
-        const object={...row, bancarizado: row.bancarizado==='true', activo: !activo}
+        const object={...row, bancarizado: row.bancarizado, activo: !activo}
         openDialog(!activo?'¿Desea  activar el tipo de pago?':'Desea  desactivar el tipo de pago', "¡No podrás revertir esto!", 'Aceptar', 'Cancelar')
             .then(async (result) => {
                 if (result) {
@@ -69,7 +70,7 @@ const TipoPago = () => {
         }
         Toast.Waiting('Guardando...')
         let object = {
-            nombre: tipo, bancarizado: selectedOption==='true'
+            nombre: tipo, bancarizado: selectedOption
         }
         if (tipoVenta.id) object = {...object, id: tipoVenta.id}
         const {data} = await TipoVenta.createOrUpdateTipoPago(object)
@@ -87,7 +88,8 @@ const TipoPago = () => {
 
     }
     return (
-        <Container>
+        <Grid container spacing={gridSpacing}>
+            <Grid item xs={12}>
             <Card>
                 <CardContent>
                     <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
@@ -151,7 +153,7 @@ const TipoPago = () => {
                                         const {bancarizado} = row
                                         return <Box>
                                             <Label variant="soft" color={'info'} sx={{textTransform: 'capitalize'}}>
-                                                {bancarizado==='true'? 'SI': 'NO'}
+                                                {bancarizado? 'SI': 'NO'}
                                             </Label>
                                         </Box>
                                     },
@@ -187,7 +189,8 @@ const TipoPago = () => {
                 </CardContent>
             </Card>
             <MyDialog/>
-        </Container>
+            </Grid>
+        </Grid>
     )
 
 }

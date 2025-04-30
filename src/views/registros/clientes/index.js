@@ -9,7 +9,7 @@ import {
     Dialog, DialogActions,
     DialogContent,
     DialogTitle,
-    FormControl,
+    FormControl, IconButton,
     Stack
 } from "@mui/material";
 import {Icon} from "@iconify/react";
@@ -17,21 +17,19 @@ import ModalClientes from "./components/ModalClientes";
 import Clientes from "../../../Models/Clientes";
 import {departamentos, distritos, provincias} from "../../../utils/constantes";
 import useAsyncSelect from "../../../customHooks/useAsyncSelect";
-import useSelect from "../../../customHooks/useSelect";
 import useInput from "../../../customHooks/useInput";
 import moment from "moment";
 import {LoadingButton} from "@mui/lab";
-import Rol from "../../../Models/Rol";
-import Vehiculos from "../../../Models/Vehiculos";
 import Routers from "../../../Models/Routers";
-import {useAuthContext} from "../../../auth/useAuthContext";
-import Usuario from "../../../Models/Usuario";
 import Label from "../../../components/label";
 import Vendedores from "../../../Models/Vendedores";
+import {esUUID} from "../../../utils/utils";
+import Ventas from "../../../Models/Ventas";
+import Toast from "../../../utils/toastUtil";
+import DocumentViewer from "../../../components/DocumentosViewer";
 
 
 const Cliente = () => {
-    const {sesion}= useAuthContext()
     const [data, setData] = useState([])
     const [config, setConfig] = useState({isOpen: false})
     const [cliente, setCliente] = useState({})
@@ -40,23 +38,21 @@ const Cliente = () => {
     const [limit, setLimit] = useState(10)
     const [loading, setLoading] = useState(false)
     const [configColapse, setConfigColapse]= useState(false)
-    const [dataVenta, setDataVenta]= useState([])
-    const [vehiculo, setVehiculo]= useState({})
     const [clienteCollapse, setClienteCollapse]= useState({})
     const [router, setRouter]= useState({})
-    const [routerSelect, selectRouter, setRouterSelect]= useAsyncSelect({
+    const [routerSelect, selectRouter, setRouterSelect, ,setOptionsSelectRouter,,,,setDisabledRouter]= useAsyncSelect({
         labelPlace:'Router', modelo: {Model:Routers, respuesta: 'routersParam', getByParam: 'getByParam'},
-    })
-    const [venta, selectVenta, setVenta,,setOptionsVenta]=useSelect({
-        placeholder:'Tipo de venta'
-    })
-    const [monto, inputMonto, setMonto]= useInput({
-        typeState: 'number', placeholder: 'Monto'
     })
     const [fechaInicio, inputFechaInicio, setFechaInicio]= useInput({
         typeState: 'date', placeholder: 'Fecha Contrato', initialState: moment().format('YYYY-MM-DD')
     })
-    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario]= useAsyncSelect({
+    const [, inputMonto, setMonto]= useInput({
+         placeholder: 'Monto', disabled: true
+    })
+    const [, inputCodigoPago, setCodigoPago]= useInput({
+        placeholder: 'Código pago', disabled: true
+    })
+    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario,,,,setDisableUsuario]= useAsyncSelect({
         labelPlace:'Vendedor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
     })
     const colorState = {
@@ -65,21 +61,17 @@ const Cliente = () => {
         INACTIVO: 'error',
     };
     useEffect(()=>{
+        if(routerSelect && esUUID(routerSelect)){
+            Routers.getById(routerSelect, 'codigo, precio_servicio')
+                .then(response=>{
+                    const routerId= response.data.routerById
+                    setCodigoPago(routerId.codigo??'')
+                    setMonto(routerId.precio_servicio??'')
+                })
+        }
+    },[routerSelect])
 
-    },[routerSelect,venta, monto, fechaInicio, usuario ])
 
-    useEffect(()=>{
-       Rol.getListTipoVentaVehiculo()
-           .then(response=>{
-               const{listTipoVentaVehiculo}= response.data
-               setDataVenta(listTipoVentaVehiculo)
-               const optionsVentas= []
-               for(const element of listTipoVentaVehiculo){
-                   optionsVentas.push({value: element.id, label: element.nombre})
-               }
-               setOptionsVenta(optionsVentas)
-           })
-    },[setOptionsVenta])
     useEffect(() => {
         setLoading(true)
         Clientes.listaClientes(page, limit)
@@ -98,9 +90,54 @@ const Cliente = () => {
         setRouter(row)
         setConfigColapse(true)
     }
+    useEffect(()=>{
+        const routerEdit= router.router??null
+        setDisabledRouter(false)
+        setDisableUsuario(false)
+        setOptionsSelectRouter([])
+        setRouterSelect(null)
+        setOptionsUsuario([])
+        setUsuario(null)
+        setMonto('')
+        setCodigoPago('')
+
+        if(routerEdit){
+            setOptionsSelectRouter([{value: routerEdit.id, label: `${routerEdit.marca}-${routerEdit.imei}`}])
+            setRouterSelect(routerEdit.id)
+            setDisabledRouter(true)
+        }
+        const vendedorEdit= router?.ventas? router.ventas[0].vendedor??null:null
+
+        if(vendedorEdit){
+            setOptionsUsuario([{value: vendedorEdit.id, label: `${vendedorEdit.documento_identidad}-${vendedorEdit.nombres}`}])
+            setUsuario(vendedorEdit.id)
+            setDisableUsuario(true)
+        }
+        setFechaInicio(router.fecha_inicio?? moment().format('YYYY-MM-DD'))
+    },[router])
+    const guardarRouterCliente= async ()=>{
+        Toast.Waiting('Guardando...')
+        let data={cliente_id: clienteCollapse.id, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario}
+        if(router.id) data={...data, id: router.id}
+        try {
+            await Ventas.createOrUpdateRouters(data)
+            Toast.Remove()
+            Toast.Success('Guardado exitoso')
+            window.location.reload()
+        }catch (e) {
+            Toast.Remove()
+            Toast.Error(e.message)
+
+        }
+    }
+    const handleCheckboxChange= async (gratis, id, setGratis)=>{
+        Ventas.updateFree(id, gratis).then(()=>{
+            setGratis(gratis)
+        })
+    }
     const rowCollapse = (row) => {
         setClienteCollapse(row)
-        const dataRow= row.data??[]
+        const dataRow= row.cliente_routers??[]
         return (
             <>
                 <Box display="flex" justifyContent="center" marginTop={2}>
@@ -109,7 +146,10 @@ const Cliente = () => {
                         color="secondary"
                         type="submit"
                         style={{margin: 3}}
-                        onClick={()=>setConfigColapse(true)}
+                        onClick={()=> {
+                            setConfigColapse(true)
+                            setRouter({})
+                        }}
                     >
                         <Icon icon="mdi:plus-circle"/> Nuevo Router
                     </Button>
@@ -127,42 +167,79 @@ const Cliente = () => {
 
                     },
                     {
+                        header: 'Excluir Pago',
+                        Cell:(row)=>{
+                            const [free, setFree]= useState(row.gratis?? false)
+                            return(
+                                    <input
+                                        type="checkbox"
+                                        checked={free}
+                                        onChange={(e)=>handleCheckboxChange(e.target.checked, row.id, setFree)}
+                                    />
+                            )
+
+                        },
+                        align: "center",
+
+                    },
+                    {
                         header: 'IMEI',
                         accessor: 'imei',
                         align: "center",
+                        Cell: (row) => {
+                            const {imei} = row.router
+                            return (<div>{imei??''}</div>)
+                        },
                     },
                     {
-                        header: 'Serie',
-                        accessor: 'serie',
+                        header: 'Código Pago',
+                        accessor: 'codigo',
                         align: "center",
+                        Cell: (row) => {
+                            const {codigo} = row.router
+                            return (<div>{codigo??''}</div>)
+                        },
                     },
                     {
                         header: 'SIM-CARD',
                         accessor: 'numero_chip',
                         align: "center",
+                        Cell: (row) => {
+                            const {chips} = row.router
+                            const chipsValidos= chips.find(element=>element.activo && element.usado)
+                            return (<div>{chipsValidos?.sim_card??''}</div>)
+                        },
                     },
                     {
                         header: 'Marca',
                         accessor: 'marca',
                         align: "center",
+                        Cell: (row) => {
+                            const {marca} = row.router
+                            return (<div>{marca??''}</div>)
+                        },
                     },
                     {
                         header: 'Modelo',
                         accessor: 'modelo',
                         align: "center",
-                    },
-                    {
-                        header: 'Sede',
                         Cell: (row) => {
-                            const {sede} = row
-                            const nombre = sede.nombre ?? ''
-                            return (<div>{nombre}</div>)
+                            const {modelo} = row.router
+                            return (<div>{modelo??''}</div>)
                         },
-                        align: "center",
-                    }
+                    },
                 ]}/>
             </>
         )
+    }
+    const [documentos, setDocumentos]= useState([])
+    const [configView, setConfigView]= useState(false)
+    const handleIconClick=(dni_back, dni_front)=>{
+        const document=[]
+        if(dni_front)document.push({nombre:'DNI Frontal', url: dni_front})
+        if(dni_back)document.push({nombre: 'DNI Reverso', url: dni_back})
+        setDocumentos(document)
+        setConfigView(true)
     }
     return (
         <Container>
@@ -223,7 +300,35 @@ const Cliente = () => {
                             Cell: (row) => data.indexOf(row) + 1 + (page ? (page - 1) * limit : 0),
                             align: "center",
                         },
-
+                        {
+                            header: ' ',
+                            Cell: (row) => {
+                                const {dni_back, dni_front} = row
+                                return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    {(dni_back || dni_front) && (
+                                        <IconButton
+                                            title="Ver detalle"
+                                            component="label"
+                                            onClick={() => handleIconClick(dni_back, dni_front)}
+                                            style={{
+                                                padding: 0,
+                                                margin: 0,
+                                            }}
+                                        >
+                                            <Icon
+                                                icon="mdi:eye"
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: 'inherit'
+                                                }}
+                                            />
+                                        </IconButton>
+                                    )}
+                                </div>
+                            },
+                            cellStyle: {minWidth: '3px'},
+                            align: "center",
+                        },
                         {
                             header: 'Acciones',
                             buttons: [
@@ -247,7 +352,7 @@ const Cliente = () => {
                             }
                         },
                         {
-                            header: 'DNI',
+                            header: 'Documento',
                             accessor: 'documento_identidad',
                             align: "center",
                         },
@@ -292,28 +397,30 @@ const Cliente = () => {
             <ModalClientes config={config} setConfig={setConfig} cliente={cliente}
                            setData={setData}
             />
+            <DocumentViewer documentos={documentos} config={configView} setConfig={setConfigView}/>
             <Dialog open={configColapse} fullWidth>
                 <DialogTitle>
-                    {vehiculo?.id ? 'Editar Router' : 'Registar Router'}
+                    {router?.id ? 'Editar Router' : 'Registar Router'}
                 </DialogTitle>
                 <DialogContent style={{paddingTop: 8}}>
                     <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
-                        <FormControl style={{flex: 1}}>
+                        <FormControl style={{flex: 2}}>
                             {selectRouter}
                         </FormControl>
-                        <FormControl style={{flex: 2}}>
-                            {selectVenta}
+                        <FormControl style={{flex: 1}}>
+                            {inputMonto}
+                        </FormControl>
+                        <FormControl style={{flex: 1}}>
+                            {inputCodigoPago}
                         </FormControl>
                     </Stack>
                     <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
-                        {inputMonto}
-                        {inputFechaInicio}
-                    </Stack>
-                    <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5, display:sesion?.rol?.id === 'd10503e9-847b-48d6-a9ff-a0f182974300'? '': 'none'}} spacing={2}>
-                        <FormControl style={{flex: 4}}>
+                        <FormControl style={{flex: 2}}>
                             {selectUsuario}
                         </FormControl>
-                        <FormControl style={{flex: 1}}/>
+                        <FormControl style={{flex: 1}}>
+                            {inputFechaInicio}
+                        </FormControl>
                     </Stack>
                 </DialogContent>
                 <DialogActions>
@@ -321,7 +428,7 @@ const Cliente = () => {
                         variant="contained"
                         color="success"
                         // disabled={disabledSave}
-                        // onClick={() => guardar()}
+                        onClick={() => guardarRouterCliente()}
                     >
                         Guardar
                     </LoadingButton>

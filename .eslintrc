@@ -39,6 +39,7 @@
   },
   "plugins": [ "react", "react-hooks"],
   "rules": {
+    "react-hooks/exhaustive-deps": "off",
     "react/jsx-uses-react": "error",
     "react/jsx-uses-vars": "error",
     "react/react-in-jsx-scope": "off",

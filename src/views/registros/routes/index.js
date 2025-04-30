@@ -1,13 +1,21 @@
 import React, {useEffect, useState} from "react"
 import ReactTablePagination from "../../../utilsComponents/CustomTable";
-import {Box, Button, Card, CardContent, Container} from "@mui/material";
+import {Box, Button, Card, CardContent, Container, IconButton} from "@mui/material";
 import {Icon} from "@iconify/react";
 import Usuario from "../../../Models/Usuario";
 import Routers from "../../../Models/Routers";
 import ModalRoute from "./components/ModalRoute";
+import Label from "../../../components/label";
+import DocumentViewer from "../../../components/DocumentosViewer";
 
 
 const Rastreador = () => {
+    const colorState = {
+        ACTIVO: 'success',
+        LIBRE: 'primary',
+        USADO: 'warning',
+        ELIMINADO: 'error',
+    };
     const [data, setData] = useState([])
     const [config, setConfig] = useState({isOpen: false})
     const [sedes, setSedes]= useState([])
@@ -37,6 +45,12 @@ const Rastreador = () => {
                 setLoading(false)
             })
     }, [page, limit])
+    const [documentos, setDocumentos]= useState([])
+    const [configView, setConfigView]= useState(false)
+    const handleIconClick=(url, nombre)=>{
+        setDocumentos([{nombre, url}])
+        setConfigView(true)
+    }
 
     return (
         <Container>
@@ -68,8 +82,37 @@ const Rastreador = () => {
                             align: "center",
                         },
                         {
-                            header: 'Serie',
-                            accessor: 'serie',
+                            header: ' ',
+                            Cell: (row) => {
+                                const {id_file, imei} = row
+                                return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    {id_file && (
+                                        <IconButton
+                                            title="Ver detalle"
+                                            component="label"
+                                            onClick={() => handleIconClick(id_file, `Router-${imei}`)}
+                                            style={{
+                                                padding: 0,
+                                                margin: 0,
+                                            }}
+                                        >
+                                            <Icon
+                                                icon="mdi:eye"
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: 'inherit'
+                                                }}
+                                            />
+                                        </IconButton>
+                                    )}
+                                </div>
+                            },
+                            cellStyle: {minWidth: '3px'},
+                            align: "center",
+                        },
+                        {
+                            header: 'Código',
+                            accessor: 'codigo',
                             align: "center",
                         },
                         {
@@ -88,8 +131,8 @@ const Rastreador = () => {
                             align: "center",
                         },
                         {
-                            header: 'SIMCARD',
-                            accessor: 'numero_chip',
+                            header: 'Precio Plan',
+                            accessor: 'precio_servicio',
                             align: "center",
                         },
                         {
@@ -103,7 +146,12 @@ const Rastreador = () => {
                         },
                         {
                             header: 'Estado',
-                            accessor: 'estado',
+                            Cell:(row)=>{
+                              const {estado}= row
+                              return (<Label variant="soft" color={colorState[estado.toUpperCase()]} sx={{textTransform: 'capitalize'}}>
+                                  {estado}
+                              </Label>)
+                            },
                             align: "center",
                         },
                         {
@@ -115,6 +163,7 @@ const Rastreador = () => {
                 </CardContent>
             </Card>
             <ModalRoute router={router} config={config} setConfig={setConfig} setData={setData}/>
+            <DocumentViewer documentos={documentos} config={configView} setConfig={setConfigView}/>
         </Container>
     )
 }

@@ -4,7 +4,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControl, Stack,
+    FormControl, IconButton, Stack,
     Table, TableBody, TableCell, TableHead, TableRow, Typography
 } from "@mui/material";
 import {LoadingButton} from "@mui/lab";
@@ -18,9 +18,11 @@ import {Icon} from '@iconify/react';
 
 import {departamentos, distritos, paisesSudamerica, provincias} from "../../../../utils/constantes";
 import {useEffect, useState} from "react";
-import {cadenaAleatoria} from "../../../../utils/utils";
+import {cadenaAleatoria, uploadImg} from "../../../../utils/utils";
 import ItemsTelefono from "./ItemsTelefono";
 import Clientes from "../../../../Models/Clientes";
+import MyDropzone from "../../../../components/MyDropzone";
+import DocumentViewer from "../../../../components/DocumentosViewer";
 
 const ModalClientes = ({config, cliente, setConfig, setData}) => {
     ModalClientes.propTypes = {
@@ -29,10 +31,10 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
         setConfig: PropTypes.func,
         setData: PropTypes.func
     }
-    const [nombres, inputNombres, setNombres, setInvalidNombres, , invalidNombres] = useInput({
+    const [nombres, inputNombres, setNombres, setInvalidNombres, , ] = useInput({
         placeholder: "Nombres y apellidos/Razón social",
     })
-    const [dni, inputDni, setDNI, setInvalidDni, , invalidDni] = useInputGroup({
+    const [dni, inputDni, setDNI, setInvalidDni, , ] = useInputGroup({
         placeholder: "Documento de identidad", onClick: () => {
             setNombres('')
             Toast.Waiting('Buscando...')
@@ -78,9 +80,14 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
     const [observaciones, inputObservaciones, setObservaciones] = useInput({
         placeholder: 'Observaciones'
     })
+    const [correo, inputCorreo, setCorreo, ] = useInput({
+        typeState: 'text', placeholder:'Correo'
+    })
     const [disabledSave, setDisabledSave] = useState(false)
     const [detalle, setDetalle] = useState([]);
     const [views, setViews] = useState([]);
+    const [doc1, setdoc1]= useState(null)
+    const [doc2, setdoc2]= useState(null)
 
     useEffect(() => {
         let options = []
@@ -99,6 +106,7 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
         setNro(cliente.numero_direccion ?? '')
         setNacionalidad(cliente.nacionalidad ?? 'PE')
         setObservaciones(cliente.observacion ?? '')
+        setCorreo(cliente.correo ?? '')
         setViews([])
         setDetalle([])
         if (cliente.celulares) {
@@ -203,26 +211,30 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
     const guardar = async () => {
         Toast.Waiting('Guardando...')
         let object = {
-            documento_identidad: dni, direccion, numero_direccion: nro,
+            documento_identidad: dni, direccion, numero_direccion: nro,correo: correo??null,
             observacion: observaciones ?? null, nacionalidad,
             nombres, provincia, departamento, distrito, celulares: views.map(element => {
                 return {id: element.id, tipo: element.tipo, numero: element.numero}
-            })
+            }), doc2, doc1
         }
         if (cliente.id) object = {...object, id: cliente.id}
         try {
-            const {data} = await Clientes.createOrUpdate(object, 'id, estado,documento_identidad, direccion, observacion,numero_direccion,nombres, provincia, departamento, distrito, nacionalidad,celulares{id, tipo, numero}')
+            const {data} = await Clientes.createOrUpdate(object, 'id, estado,correo,documento_identidad, direccion, observacion,numero_direccion,nombres, provincia, dni_back,dni_front,departamento, distrito, nacionalidad,celulares{id, tipo, numero}')
             const newcliente = data.createOrUpdateClientes
             if (cliente.id) {
-                setData(prev => prev.map(element => element.id === cliente.id ? {...newcliente} : {...element}))
+                setData(prev => prev.map(element => element.id === cliente.id ? {...newcliente, cliente_routers: element.cliente_routers} : {...element}))
                 Toast.Remove()
                 Toast.Success('Guardado exitoso')
                 setConfig({...config, isOpen: false})
+                setdoc2(null)
+                setdoc1(null)
                 return
             }
             setData(prev => [{...newcliente}, ...prev])
             Toast.Remove()
             Toast.Success('Guardado exitoso')
+            setdoc2(null)
+            setdoc1(null)
             setConfig({...config, isOpen: false})
 
         } catch (e) {
@@ -230,6 +242,34 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
             Toast.Error(e.message)
         }
 
+    }
+
+    const onDrop1 = accepted => {
+        uploadImg(accepted[0], 'multimedia', null)
+            .then(response => response.json())
+            .then(({data}) => {
+                setdoc1(data.name)
+            })
+            .catch(({message}) => {
+                Toast.Error(message, {autoClose: 4000})
+            })
+    }
+    const onDrop2 = accepted => {
+        uploadImg(accepted[0], 'multimedia', null)
+            .then(response => response.json())
+            .then(({data}) => {
+                setdoc2(data.name)
+            })
+            .catch(({message}) => {
+                Toast.Error(message, {autoClose: 4000})
+            })
+    }
+    const [documentos, setDocumentos]= useState([])
+    const [configView, setConfigView]= useState(false)
+
+    const handleIconClick=async (nombre, url)=>{
+        setDocumentos([{nombre, url}])
+        setConfigView(true)
     }
 
     return (
@@ -251,6 +291,68 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
                     {selectDepartamento}
                     {selectProvincia}
                     {selectDistrito}
+                </Stack>
+                <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
+                    <FormControl style={{flex: 3, border: '1px solid #ccc', borderRadius: '8px', padding: '10px'}}>
+                        <Typography variant="h6" gutterBottom>
+                            Subir Documento de identidad
+                        </Typography>
+                        <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
+                            <FormControl style={{flex: 2, border: '1px solid #ccc', borderRadius: '8px'}}>
+                                <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
+                                    <FormControl style={{flex: 8}}>
+                                        <MyDropzone onDrop={onDrop1} placeholder="DNI Lado1"/>
+                                    </FormControl>
+                                    {cliente?.dni_front&&
+                                        <IconButton
+                                            title="Ver detalle"
+                                            component="label"
+                                            onClick={async () => await handleIconClick('DNI Frontal', cliente.dni_front)}
+                                            style={{
+                                                padding: 0,
+                                                margin: 0,
+                                            }}
+                                        >
+                                            <Icon
+                                                icon="mdi:eye"
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: 'inherit'
+                                                }}
+                                            />
+                                        </IconButton>
+                                    }
+                                </Stack>
+                            </FormControl>
+                            <FormControl style={{flex: 2, border: '1px solid #ccc', borderRadius: '8px'}}>
+                                <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
+                                    <FormControl style={{flex: 8}}>
+                                        <MyDropzone onDrop={onDrop2} placeholder="DNI Lado2"/>
+                                    </FormControl>
+                                    {cliente?.dni_back &&
+                                        <IconButton
+                                            title="Ver detalle"
+                                            component="label"
+                                            onClick={async () => await handleIconClick('DNI Reverso', cliente.dni_back)}
+                                            style={{
+                                                padding: 0,
+                                                margin: 0,
+                                            }}
+                                        >
+                                            <Icon
+                                                icon="mdi:eye"
+                                                style={{
+                                                    fontSize: 18,
+                                                    color: 'inherit'
+                                                }}
+                                            />
+                                        </IconButton>
+                                    }
+                                </Stack>
+                            </FormControl>
+                        </Stack>
+
+                    </FormControl>
                 </Stack>
                 <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
                     <FormControl style={{flex: 3, border: '1px solid #ccc', borderRadius: '8px', padding: '10px'}}>
@@ -321,6 +423,9 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
                             {selectNacionalidad}
                         </Stack>
                         <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingTop: '2%'}} spacing={2}>
+                            {inputCorreo}
+                        </Stack>
+                        <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingTop: '2%'}} spacing={2}>
                             {inputObservaciones}
                         </Stack>
                     </FormControl>
@@ -345,6 +450,7 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
                     Cancelar
                 </Button>
             </DialogActions>
+            <DocumentViewer config={configView} setConfig={setConfigView} documentos={documentos}/>
         </Dialog>
     )
 }

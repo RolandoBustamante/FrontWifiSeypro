@@ -6,21 +6,13 @@ import {
     Box,
     Button,
     Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     FormControl,
     Stack,
-    TableCell
 } from "@mui/material";
 import {Icon} from "@iconify/react";
-import {useTheme} from "@mui/system";
 import useSelect from "../../../../customHooks/useSelect";
 import useInput from "../../../../customHooks/useInput";
-import {LoadingButton} from "@mui/lab";
 import Vehiculos from "../../../../Models/Vehiculos";
-import {element} from "prop-types";
 
 const TipoVehiculos = () => {
     const [tipoVehiculo, setTipoVehiculo] = useState({})

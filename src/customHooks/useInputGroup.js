@@ -64,7 +64,7 @@ export default function useInputPass({
                 }}
                 endAdornment={
                     <InputAdornment position="end">
-                        {!disabled&&<IconButton
+                        {!isDisabled&&<IconButton
                             aria-label="toggle password visibility"
                             onClick={onClick}
                             onMouseDown={handleMouseDownPassword}

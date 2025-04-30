@@ -18,7 +18,7 @@ const Routers={
     createOrUpdateRouters: (data)=>{
         const mutation=gql(`mutation createOrUpdateRouters($data: JSONObject!){
             createOrUpdateRouters(data: $data){
-                id, imei, marca, modelo, sede_id, fecha_compra, 
+                id, imei, marca, modelo, sede_id, fecha_compra, estado, precio_servicio, codigo, id_file,
                 chips{id, paquete, fecha_renovacion, marca, activo, usado, sim_card}
             }
         }`)
@@ -54,5 +54,15 @@ const Routers={
         `)
         return client.query({query, fetchPolicy: 'no-cache'})
     },
+    getById: (id, recursos)=>{
+        const query= gql(`
+        query routerById($id: String!){
+            routerById(id: $id){
+                ${recursos}
+            }
+        }
+        `)
+        return client.query({query, variables:{id}, fetchPolicy: 'no-cache'})
+    }
 }
 export default Routers

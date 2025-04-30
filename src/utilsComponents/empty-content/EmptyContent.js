@@ -10,6 +10,7 @@ EmptyContent.propTypes = {
   description: PropTypes.string,
 };
 
+// eslint-disable-next-line no-unused-vars
 export default function EmptyContent({ title, description, img, sx, ...other }) {
   return (
     <Stack

@@ -6,9 +6,10 @@ import AuthenticationRoutes from './AuthenticationRoutes';
 import AdminRoute from "./AdminRoute";
 import RegistrosRoute from "./RegistrosRoute";
 import PagosRoutes from "./PagosRoutes";
+import ListRoute from "./ListRoute";
 
 // ==============================|| ROUTING RENDER ||============================== //
 
 export default function ThemeRoutes() {
-  return useRoutes([AdminRoute,MainRoutes, AuthenticationRoutes, RegistrosRoute, PagosRoutes]);
+  return useRoutes([AdminRoute,MainRoutes, AuthenticationRoutes, RegistrosRoute, PagosRoutes, ListRoute]);
 }

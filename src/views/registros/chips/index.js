@@ -3,32 +3,32 @@ import ReactTablePagination from "../../../utilsComponents/CustomTable";
 import {Box, Button, Card, CardContent, Container} from "@mui/material";
 import {Icon} from "@iconify/react";
 import Usuario from "../../../Models/Usuario";
-import Routers from "../../../Models/Routers";
 
 import moment from "moment";
 import Sims from "../../../Models/Sims";
 import ModalSims from "./components/ModalSims";
+import Label from "../../../components/label";
 
 const Sim = () => {
     const [data, setData] = useState([])
     const [config, setConfig] = useState({isOpen: false})
-    const [sedes, setSedes]= useState([])
+    const [sedes, setSedes] = useState([])
     const [chip, setChip] = useState({})
     const [infoData, setInfoData] = useState({})
     const [page, setPage] = useState(null)
     const [limit, setLimit] = useState(10)
     const [loading, setLoading] = useState(false)
 
-    useEffect(()=>{
-       setLoading(true)
-       Sims.listSims(page, limit)
-           .then(response=>{
-               const {allChips, info} = response.data.listChips.data
-               setData(allChips)
-               setInfoData(info)
-               setLoading(false)
-           })
-    },[])
+    useEffect(() => {
+        setLoading(true)
+        Sims.listSims(page, limit)
+            .then(response => {
+                const {allChips, info} = response.data.listChips.data
+                setData(allChips)
+                setInfoData(info)
+                setLoading(false)
+            })
+    }, [])
 
     const editChip = (row) => {
         setChip(row)
@@ -37,14 +37,24 @@ const Sim = () => {
     useEffect(() => {
         Usuario.allSedes().then(response => {
             const {allSedes} = response.data
-            setSedes(allSedes.filter(element=>element.almacen))
+            setSedes(allSedes)
         })
     }, [])
     const rowCollapse = (row) => {
 
+        const {router} = row
+        return (
+            <div style={{ border: "1px solid #ccc", padding: "10px", width: "300px", fontFamily: "Arial, sans-serif" }}>
+                <h3 style={{ marginBottom: "10px" }}>Información del Dispositivo</h3>
+                <p><strong>IMEI:</strong> {router?.imei ?? ''}</p>
+                <p><strong>Marca:</strong> {router?.marca ?? ''}</p>
+                <p><strong>Precio del Servicio:</strong> S/ {router?.precio_servicio ?? ''}</p>
+                <p><strong>Estado:</strong> {router?.estado ?? ''}</p>
+            </div>
+        );
     }
 
-    return(
+    return (
         <Container>
             <Card>
                 <CardContent>
@@ -67,33 +77,38 @@ const Sim = () => {
                         {
                             header: '',
                             Cell: (row) => {
-                                return (<span
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setData((prevState) =>
-                                            prevState.map((element) =>
-                                                element.id === row.id ? {
-                                                    ...element, open: !row.open, collapseElement: rowCollapse(row)
-                                                } : {...element}
-                                            )
-                                        );
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
+                                return <div>
+                                    {row.usado && <span
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={(e) => {
                                             e.stopPropagation();
                                             setData((prevState) =>
                                                 prevState.map((element) =>
-                                                    element.id === row.id ? {...element, open: !row.open} : {...element}
+                                                    element.id === row.id ? {
+                                                        ...element, open: !row.open, collapseElement: rowCollapse(row)
+                                                    } : {...element}
                                                 )
                                             );
-                                        }
-                                    }}
-                                    style={{cursor: 'pointer'}}
-                                >
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.stopPropagation();
+                                                setData((prevState) =>
+                                                    prevState.map((element) =>
+                                                        element.id === row.id ? {
+                                                            ...element,
+                                                            open: !row.open
+                                                        } : {...element}
+                                                    )
+                                                );
+                                            }
+                                        }}
+                                        style={{cursor: 'pointer'}}
+                                    >
                                      {row.open ? '👇' : '👉'}
-                                 </span>)
+                                 </span>}
+                                </div>
                             },
                             cellStyle: {minWidth: '10px'},
                             align: "center",
@@ -124,28 +139,37 @@ const Sim = () => {
                             align: "center",
                         },
                         {
-                            header: 'SEDE',
+                            header: 'UBICACIÓN',
                             Cell: (row) => {
-                                const {sede_id} = row
-                                const elemento= sedes.find(element=>element.id===sede_id)
-                                return (<div>{elemento.nombre}</div>)
+                                const {sede_id, usado} = row
+                                const elemento = sedes.find(element => element.id === sede_id)
+                                return (<div>{usado ? '-' : elemento.nombre}</div>)
                             },
                             align: "center",
                         },
                         {
                             header: 'ESTADO',
                             accessor: 'estado',
+                            Cell: (row) => {
+                                const {usado} = row
+                                return (<Box>
+                                    <Label variant="soft" color={usado ? 'primary' : 'success'}
+                                           sx={{textTransform: 'capitalize'}}>
+                                        {usado ? 'USADO' : 'LIBRE'}
+                                    </Label>
+                                </Box>)
+                            },
                             align: "center",
                         },
                         {
                             header: 'Fecha renovación',
                             Cell: (row) => {
                                 let {fecha_renovacion} = row
-                                const diaActual=moment().format('DD')
-                                fecha_renovacion= moment(fecha_renovacion, 'YYYY-MM-DD').format('DD')
-                                if(Number(diaActual)<=Number(fecha_renovacion))
-                                    fecha_renovacion= `${moment().format("YYYY-MM")}-${fecha_renovacion}`
-                                else fecha_renovacion= `${moment().add(1, 'month').format("YYYY-MM")}-${fecha_renovacion}`
+                                const diaActual = moment().format('DD')
+                                fecha_renovacion = moment(fecha_renovacion, 'YYYY-MM-DD').format('DD')
+                                if (Number(diaActual) <= Number(fecha_renovacion))
+                                    fecha_renovacion = `${moment().format("YYYY-MM")}-${fecha_renovacion}`
+                                else fecha_renovacion = `${moment().add(1, 'month').format("YYYY-MM")}-${fecha_renovacion}`
                                 return (<div>{fecha_renovacion}</div>)
                             },
                             align: "center",

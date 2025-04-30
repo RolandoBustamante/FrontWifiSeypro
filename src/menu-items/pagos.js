@@ -1,7 +1,7 @@
 import {IconBrandCashapp} from '@tabler/icons'
 const pagos={
     id: 'admin_pagos',
-    title: 'pagos',
+    title: 'Pagos',
     type: 'group',
     children:[
         {
