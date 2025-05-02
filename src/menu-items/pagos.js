@@ -11,12 +11,6 @@ const pagos={
             icon: IconBrandCashapp,
             children: [
                 {
-                    id: 'tipo_venta',
-                    title: 'Menú pagos',
-                    type: 'item',
-                    url: '/pagos/menu',
-                },
-                {
                     id: 'tipo_pago',
                     title: 'Tipo pagos',
                     type: 'item',

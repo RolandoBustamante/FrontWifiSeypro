@@ -88,26 +88,27 @@ const ProfileSection = () => {
                     alignItems: 'center',
                     borderRadius: '27px',
                     transition: 'all .2s ease-in-out',
-                    borderColor: theme.palette.secondary.light,
-                    backgroundColor: theme.palette.secondary.light,
+                    borderColor: theme.palette.primary.light,
+                    backgroundColor: theme.palette.primary.light,
                     '&[aria-controls="menu-list-grow"], &:hover': {
-                        borderColor: theme.palette.secondary.main,
-                        background: `${theme.palette.secondary.main}!important`,
-                        color: 'black',
+                        borderColor: theme.palette.primary.main,
+                        background: `${theme.palette.primary.main}!important`,
+                        color: theme.palette.secondary.light,
                         '& svg': {
-                            stroke: 'black'
+                            stroke: theme.palette.secondary.light
                         }
                     },
                     '& .MuiChip-label': {
                         lineHeight: 0
                     }
                 }}
-                label={<IconSettings stroke={1.5} size="1.5rem" color='black'/>}
+                label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main}/>}
                 variant="outlined"
                 ref={anchorRef}
                 aria-controls={open ? 'menu-list-grow' : undefined}
                 aria-haspopup="true"
                 onClick={handleToggle}
+                color="primary"
             />
             <Popper
                 placement="bottom-end"
@@ -159,6 +160,34 @@ const ProfileSection = () => {
                                                     <IconSettings stroke={1.5} size="1.3rem"/>
                                                 </ListItemIcon>
                                                 <ListItemText primary={<Typography variant="body2">Cambiar de sede</Typography>}/>
+                                            </ListItemButton>
+                                            <ListItemButton
+                                                sx={{borderRadius: `${customization.borderRadius}px`}}
+                                                selected={selectedIndex === 1}
+                                                onClick={(event) => handleListItemClick(event, 1, '#')}
+                                            >
+                                                <ListItemIcon>
+                                                    <IconUser stroke={1.5} size="1.3rem"/>
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <Grid container spacing={1} justifyContent="space-between">
+                                                            <Grid item>
+                                                                <Typography variant="body2">Social Profile</Typography>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <Chip
+                                                                    label="02"
+                                                                    size="small"
+                                                                    sx={{
+                                                                        bgcolor: theme.palette.warning.dark,
+                                                                        color: theme.palette.background.default
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
+                                                    }
+                                                />
                                             </ListItemButton>
                                             <ListItemButton
                                                 sx={{borderRadius: `${customization.borderRadius}px`}}

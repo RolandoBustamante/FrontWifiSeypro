@@ -67,7 +67,7 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
                                     textAlign: column.align ?? "start",
                                     ...(column.headerStyle || {}),
                                     border: `1px solid white`,
-                                    color: 'black',
+                                    color: 'white',
                                     padding: 0, margin: 0
                                 }}
                                 key={index}
@@ -184,7 +184,7 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
                           </IconButton>
                         </span>
                         </Tooltip>
-                        <Typography variant="overline">
+                        <Typography variant="overline" color="secondary">
                             Página {(pages && prev + 1) || 0} de {pages || 0}
                         </Typography>
                         <Tooltip title="SIGUIENTE" placement="right">

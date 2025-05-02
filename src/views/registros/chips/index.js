@@ -41,18 +41,19 @@ const Sim = () => {
         })
     }, [])
     const rowCollapse = (row) => {
-
-        const {router} = row
+        const { router } = row;
         return (
             <div style={{ border: "1px solid #ccc", padding: "10px", width: "300px", fontFamily: "Arial, sans-serif" }}>
+                <h2 style={{ marginBottom: "10px" }}>Info Router</h2>
                 <h3 style={{ marginBottom: "10px" }}>Información del Dispositivo</h3>
-                <p><strong>IMEI:</strong> {router?.imei ?? ''}</p>
-                <p><strong>Marca:</strong> {router?.marca ?? ''}</p>
+                <p><strong>IMEI (ROUTER):</strong> {router?.imei ?? ''}</p>
+                <p><strong>Marca (ROUTER):</strong> {router?.marca ?? ''}</p>
                 <p><strong>Precio del Servicio:</strong> S/ {router?.precio_servicio ?? ''}</p>
-                <p><strong>Estado:</strong> {router?.estado ?? ''}</p>
+                <p><strong>Estado (ROUTER):</strong> {router?.estado ?? ''}</p>
             </div>
         );
     }
+
 
     return (
         <Container>
