@@ -60,6 +60,19 @@ const Cliente = () => {
         BLOQUEADO: 'error',
         INACTIVO: 'error',
     };
+    const [time, setTime]= useState(0)
+
+    const [buscar, inputBuscar] = useInput({
+        typeState: 'text', initialState: '', placeholder: 'Buscar...'
+    })
+    useEffect(()=>{
+        setTimeout(()=>{
+            setTime(0)
+        },time*1000)
+    },[time])
+    useEffect(() => {
+        setTime(3)
+    }, [buscar])
     useEffect(()=>{
         if(routerSelect && esUUID(routerSelect)){
             Routers.getById(routerSelect, 'codigo, precio_servicio')
@@ -73,15 +86,16 @@ const Cliente = () => {
 
 
     useEffect(() => {
+        if(time>0)
         setLoading(true)
-        Clientes.listaClientes(page, limit)
+        Clientes.listaClientes(page, limit, buscar)
             .then(response => {
                 const {clientes, info} = response.data.listaClientes.data
                 setData(clientes)
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [limit, page])
+    }, [limit, page, buscar, time])
     const editCliente = (row) => {
         setCliente(row)
         setConfig({...config, isOpen: true})
@@ -245,6 +259,9 @@ const Cliente = () => {
         <Container>
             <Card>
                 <CardContent>
+                    <Box display="flex" justifyContent="flex-start" width="100%" marginTop={2}>
+                        <Box>{inputBuscar}</Box>
+                    </Box>
                     <Box display="flex" justifyContent="center" marginTop={2}>
                         <Button
                             variant="contained"

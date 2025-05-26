@@ -5,11 +5,11 @@ const registro={
     type: 'group',
     children:[
         {
-            id:'admin-registros',
-            title: 'Clientes',
+            id:'admin-sims',
+            title: 'SIM-CARDS',
             type: 'item',
-            url: '/registro/clientes',
-            icon: IconUserPlus,
+            url: '/registro/sims',
+            icon: IconDeviceSim,
             breadcrumbs: false
         },
         {
@@ -21,6 +21,14 @@ const registro={
             breadcrumbs: false
         },
         {
+            id:'admin-registros',
+            title: 'Clientes',
+            type: 'item',
+            url: '/registro/clientes',
+            icon: IconUserPlus,
+            breadcrumbs: false
+        },
+        {
             id:'admin-servicio',
             title: 'Servicio',
             type: 'item',
@@ -28,14 +36,7 @@ const registro={
             icon: IconBrandShopee,
             breadcrumbs: false
         },
-        {
-            id:'admin-sims',
-            title: 'SIM-CARDS',
-            type: 'item',
-            url: '/registro/sims',
-            icon: IconDeviceSim,
-            breadcrumbs: false
-        },
+
         {
             id:'admin-ventas',
             title: 'Registro Ventas',

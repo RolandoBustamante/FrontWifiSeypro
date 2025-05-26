@@ -60,7 +60,7 @@ const DialogPdfViewer = ({ open, onClose, url }) => {
     }, [open, url]);
 
     return (
-        <Dialog open={open} fullWidth maxWidth="lg" >
+        <Dialog open={open} fullWidth>
             <DialogTitle sx={{ position: 'relative', pb: 1.5 }}>
                 <Grid container spacing={1} alignItems="center">
                     <Grid item xs={4}>
@@ -92,11 +92,18 @@ const DialogPdfViewer = ({ open, onClose, url }) => {
             </DialogTitle>
             <DialogContent>
                 {pdfUrl ? (
-                    <iframe
-                        src={pdfUrl}
-                        title="Comprobante PDF"
-                        style={{ width: '100%', height: '85vh', border: 'none' }}
-                    />
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        {/* eslint-disable-next-line jsx-a11y/iframe-has-title */}
+                        <iframe
+                            src={`${pdfUrl}#toolbar=1&amp;navpanes=0&amp;scrollbar=0`}
+                            style={{
+                                border: 'none',
+                                width: '100%',
+                                height: '70vh',
+                            }}
+                            allow="autoplay"
+                        />
+                    </div>
                 ) : (
                     <div style={{ padding: '2rem', textAlign: 'center' }}>
                         <CircularProgress />

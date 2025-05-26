@@ -7,6 +7,7 @@ import {Icon} from "@iconify/react";
 import CustomTable from "../../utilsComponents/CustomTable";
 import DialogPdfViewer from "../../components/DialogPdfViewer";
 import Toast from "../../utils/toastUtil";
+import Swal from "sweetalert2";
 
 
 const ListVentas = () => {
@@ -75,19 +76,57 @@ const ListVentas = () => {
                             },
                             {
                                 header: 'Acción', align: 'center', Cell: (row) => (
-                                    <Tooltip title="Ver PDF">
-                                        <IconButton onClick={() => {
-                                            Toast.Waiting('Cargando...')
-                                            Ventas.obtenerRuta(row.id).then(response => {
-                                                const {label}= response.data.obtenerRuta
-                                                setPdfUrl(label);
-                                                setDialogOpen(true);
-                                                Toast.Remove()
-                                            })
-                                        }}>
-                                            <Icon icon="mdi:file-pdf-box" color="red" width={24} height={24}/>
-                                        </IconButton>
-                                    </Tooltip>)
+
+                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                                        <Tooltip title="Ver PDF">
+                                            <IconButton onClick={() => {
+                                                Toast.Waiting('Cargando...')
+                                                Ventas.obtenerRuta(row.id).then(response => {
+                                                    const {label}= response.data.obtenerRuta
+                                                    setPdfUrl(label);
+                                                    setDialogOpen(true);
+                                                    Toast.Remove()
+                                                })
+                                            }}>
+                                                <Icon icon="mdi:file-pdf-box" color="red" width={24} height={24}/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Dar de baja">
+                                            <IconButton onClick={async () => {
+                                                const { value: motivo } = await Swal.fire({
+                                                    title: 'Motivo de la baja',
+                                                    input: 'text',
+                                                    inputPlaceholder: 'Ingrese el motivo',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: 'Confirmar',
+                                                    cancelButtonText: 'Cancelar',
+                                                    inputValidator: (value) => {
+                                                        if (!value) return 'Debe ingresar un motivo';
+                                                    }
+                                                });
+
+                                                if (motivo) {
+                                                    Toast.Waiting('Enviando a SUNAT...');
+                                                    try {
+                                                        const res = await Ventas.anularComprobante( row.id, motivo );
+                                                        const { anularOperacion } = res.data;
+                                                        Toast.Remove();
+                                                        if (anularOperacion.success) {
+                                                            Toast.Success('Nota de crédito emitida correctamente');
+                                                        } else {
+                                                            Toast.Error('Error al emitir la nota');
+                                                        }
+                                                    } catch (e) {
+                                                        Toast.Remove();
+                                                        Toast.Error(e.message);
+                                                    }
+                                                }
+                                            }}>
+                                                <Icon icon="mdi:file-cancel-outline" color="orange" width={24} height={24} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </div>
+                                   )
                             },
                             {header: 'Cliente', accessor: 'clienteNombre'},
                             {header: 'Serie', accessor: 'serie'},

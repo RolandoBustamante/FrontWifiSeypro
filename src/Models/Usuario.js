@@ -97,6 +97,41 @@ const Usuario = {
           }
         `)
         return client.query({query, fetchPolicy: 'no-cache'})
-    }
+    },
+    createOrUpdateNumeroAviso: (data) => {
+        const query = gql(`
+      query createOrUpdateNumeroAviso($data: JSONObject!) {
+        createUpdateNumeroAviso(data: $data) {
+         data
+        }
+      }
+    `)
+        return client.query({ query, variables: { data }, fetchPolicy: 'no-cache' })
+    },
+
+    desactivarNumeroAviso: (id) => {
+        const query = gql(`
+      query desactivarNumeroAviso($id: String!) {
+        desactivarNumeroAviso(id: $id) {
+          success
+        }
+      }
+    `)
+        return client.query({ query, variables: { id }, fetchPolicy: 'no-cache' })
+    },
+
+    listarNumerosAviso: () => {
+        const query = gql(`
+      query listarNumerosAviso {
+        listarNumerosAviso {
+          id
+          numero
+          nombre
+          eliminado
+        }
+      }
+    `)
+        return client.query({ query, fetchPolicy: 'no-cache' })
+    },
 };
 export default Usuario;

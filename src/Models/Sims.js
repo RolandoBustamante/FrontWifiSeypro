@@ -5,15 +5,15 @@ import apollo from '../utils/apollo';
 const client = apollo;
 
 const Sims={
-    listSims: (page, limit)=>{
+    listSims: (page, limit, sim_card)=>{
         const query=gql(`
-            query listChips($page: Int, $limit: Int){
-                listChips(page: $page, limit: $limit){
+            query listChips($page: Int, $limit: Int, $sim_card: String){
+                listChips(page: $page, limit: $limit, sim_card: $sim_card){
                     data
                 }
             }
         `)
-        return client.query({query, variables: {page, limit}, fetchPolicy: 'no-cache'})
+        return client.query({query, variables: {page, limit, sim_card}, fetchPolicy: 'no-cache'})
     },
     createOrSims: (data)=>{
         const mutation=gql(`mutation createOrUpdateSim($data: JSONObject!){

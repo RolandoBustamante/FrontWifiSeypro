@@ -9,6 +9,7 @@ const AdminPage= Loadable(lazy(()=>import('views/admin')))
 const VendedorPage= Loadable(lazy(()=>import('views/registros/Vendedores')))
 const WhatsappPage= Loadable(lazy(()=>import('views/whatsapp')))
 const RolesAdminPage= Loadable(lazy(()=>import('views/rolesPermisos')))
+const NumerosAviso= Loadable(lazy(()=>import('views/Avisos')))
 
 const AdminRoute={
     path:'/admin',
@@ -29,6 +30,10 @@ const AdminRoute={
         {
             path: 'whatsapp',
             element: <WhatsappPage/>
+        },
+        {
+            path: 'nro-aviso',
+            element: <NumerosAviso/>
         }
     ]
 }

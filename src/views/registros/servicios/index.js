@@ -1,4 +1,4 @@
-import {Button, Card, CardContent, Container, FormControl, Stack} from "@mui/material";
+import {Button, Card, CardContent, Container, FormControl, FormControlLabel, Stack} from "@mui/material";
 import React, {useEffect} from "react";
 import useAsyncSelect from "../../../customHooks/useAsyncSelect";
 import Routers from "../../../Models/Routers";
@@ -10,6 +10,7 @@ import {LoadingButton} from "@mui/lab";
 import Toast from "../../../utils/toastUtil";
 import Ventas from "../../../Models/Ventas";
 import {esUUID} from "../../../utils/utils";
+import useSwitch from "../../../customHooks/useSwitch";
 
 
 const Servicios= ()=>{
@@ -22,7 +23,7 @@ const Servicios= ()=>{
     const [fechaInicio, inputFechaInicio, setFechaInicio]= useInput({
         typeState: 'date', placeholder: 'Fecha Contrato', initialState: moment().format('YYYY-MM-DD')
     })
-    const [, inputMonto, setMonto]= useInput({
+    const [monto, inputMonto, setMonto]= useInput({
         placeholder: 'Monto', disabled: true
     })
     const [, inputCodigoPago, setCodigoPago]= useInput({
@@ -31,6 +32,8 @@ const Servicios= ()=>{
     const [usuario, selectUsuario, setUsuario, ]= useAsyncSelect({
         labelPlace:'Vendedor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
     })
+    const [emitir, switchEmitir,setSwitch] = useSwitch({initialState: true})
+
     useEffect(()=>{
         if(routerSelect && esUUID(routerSelect)){
             Routers.getById(routerSelect, 'codigo, precio_servicio')
@@ -43,7 +46,7 @@ const Servicios= ()=>{
     },[routerSelect])
     const guardarRouterCliente= async ()=>{
         Toast.Waiting('Guardando...')
-        let data={cliente_id: clienteSelect, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario}
+        let data={cliente_id: clienteSelect, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario, emitir, monto}
         try {
             await Ventas.createOrUpdateRouters(data)
             Toast.Remove()
@@ -81,6 +84,13 @@ const Servicios= ()=>{
                         <FormControl style={{flex: 1}}>
                             {inputFechaInicio}
                         </FormControl>
+                        <FormControl style={{flex: 1}}>
+                            <FormControlLabel
+                                control={switchEmitir}
+                                label="Generar Recibo"
+                                labelPlacement="start"
+                            />
+                        </FormControl>
                     </Stack>
                 </CardContent>
                 <CardContent>
@@ -107,6 +117,7 @@ const Servicios= ()=>{
                                 setFechaInicio(moment().format('YYYY-MM-DD'))
                                 setRouterSelect('')
                                 setRouterCliente('')
+                                setSwitch(true)
                             }}
                         >
                             Cancelar

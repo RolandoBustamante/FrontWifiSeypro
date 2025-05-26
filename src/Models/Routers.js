@@ -5,15 +5,15 @@ import apollo from '../utils/apollo';
 const client = apollo;
 
 const Routers={
-    listRouters: (page, limit)=>{
+    listRouters: (page, limit, imei)=>{
         const query=gql(`
-            query listRouters($page: Int, $limit: Int){
-                listRouters(page: $page, limit: $limit){
+            query listRouters($page: Int, $limit: Int, $imei: String){
+                listRouters(page: $page, limit: $limit, imei: $imei){
                     data
                 }
             }
         `)
-        return client.query({query, variables: {page, limit}, fetchPolicy: 'no-cache'})
+        return client.query({query, variables: {page, limit, imei}, fetchPolicy: 'no-cache'})
     },
     createOrUpdateRouters: (data)=>{
         const mutation=gql(`mutation createOrUpdateRouters($data: JSONObject!){

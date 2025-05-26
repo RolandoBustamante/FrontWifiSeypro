@@ -30,7 +30,7 @@ const ModalSims=({config, sim, setConfig, setData, sedes})=>{
         placeholder: "Sim-Card", typeState: 'number'
     })
     const [marca, inputMarca, setMarca, setInvalidMarca, , ] = useInput({
-        placeholder: "Marca",
+        placeholder: "Operador",
     })
     const [paquete, inputPaquete, setPaquete, setInvalidPaquete, , ] = useInput({
         placeholder: "Paquete de datos",

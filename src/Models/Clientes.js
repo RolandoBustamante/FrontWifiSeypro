@@ -13,15 +13,15 @@ const Clientes={
         }`)
         return client.mutate({mutation, variables:{data}, fetchPolicy: 'no-cache'})
     },
-    listaClientes: (page, limit)=>{
+    listaClientes: (page, limit, buscar)=>{
         const query=gql(`
-            query listaClientes($page: Int, $limit: Int){
-                listaClientes(page: $page, limit: $limit){
+            query listaClientes($page: Int, $limit: Int, $buscar: String){
+                listaClientes(page: $page, limit: $limit, buscar: $buscar){
                     data
                 }
             }
         `)
-        return client.query({query, variables: {page, limit}, fetchPolicy: 'no-cache'})
+        return client.query({query, variables: {page, limit, buscar}, fetchPolicy: 'no-cache'})
     },
     getByParam: (param)=>{
         const query= gql(`
@@ -63,5 +63,15 @@ const Clientes={
         `)
         return client.query({query,variables:{param}, fetchPolicy: 'no-cache'})
     },
+    obtenerRecurso: (driveId)=>{
+        const query= gql(`
+        query obtenerDrive($driveId: String!){
+            obtenerDrive(driveId: $driveId){
+            label
+           }
+        }
+        `)
+        return client.query({query,variables:{driveId}, fetchPolicy: 'no-cache'})
+    }
 }
 export default Clientes

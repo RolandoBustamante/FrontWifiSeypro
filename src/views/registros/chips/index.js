@@ -8,6 +8,7 @@ import moment from "moment";
 import Sims from "../../../Models/Sims";
 import ModalSims from "./components/ModalSims";
 import Label from "../../../components/label";
+import useInput from "../../../customHooks/useInput";
 
 const Sim = () => {
     const [data, setData] = useState([])
@@ -18,17 +19,30 @@ const Sim = () => {
     const [page, setPage] = useState(null)
     const [limit, setLimit] = useState(10)
     const [loading, setLoading] = useState(false)
+    const [buscar, inputBuscar] = useInput({
+        typeState: 'text', initialState: '', placeholder: 'Buscar...'
+    })
+    const [time, setTime]= useState(0)
+    useEffect(() => {
+        setTime(3)
+    }, [buscar])
+    useEffect(()=>{
+        setTimeout(()=>{
+            setTime(0)
+        },time*1000)
+    },[time])
 
     useEffect(() => {
+        if(time>0) return
         setLoading(true)
-        Sims.listSims(page, limit)
+        Sims.listSims(page, limit, buscar)
             .then(response => {
                 const {allChips, info} = response.data.listChips.data
                 setData(allChips)
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [])
+    }, [buscar, time])
 
     const editChip = (row) => {
         setChip(row)
@@ -41,11 +55,11 @@ const Sim = () => {
         })
     }, [])
     const rowCollapse = (row) => {
-        const { router } = row;
+        const {router} = row;
         return (
-            <div style={{ border: "1px solid #ccc", padding: "10px", width: "300px", fontFamily: "Arial, sans-serif" }}>
-                <h2 style={{ marginBottom: "10px" }}>Info Router</h2>
-                <h3 style={{ marginBottom: "10px" }}>Información del Dispositivo</h3>
+            <div style={{border: "1px solid #ccc", padding: "10px", width: "300px", fontFamily: "Arial, sans-serif"}}>
+                <h2 style={{marginBottom: "10px"}}>Info Router</h2>
+                <h3 style={{marginBottom: "10px"}}>Información del Dispositivo</h3>
                 <p><strong>IMEI (ROUTER):</strong> {router?.imei ?? ''}</p>
                 <p><strong>Marca (ROUTER):</strong> {router?.marca ?? ''}</p>
                 <p><strong>Precio del Servicio:</strong> S/ {router?.precio_servicio ?? ''}</p>
@@ -59,6 +73,9 @@ const Sim = () => {
         <Container>
             <Card>
                 <CardContent>
+                    <Box display="flex" justifyContent="flex-start" width="100%" marginTop={2}>
+                        <Box>{inputBuscar}</Box>
+                    </Box>
                     <Box display="flex" justifyContent="center" marginTop={2}>
                         <Button
                             variant="contained"

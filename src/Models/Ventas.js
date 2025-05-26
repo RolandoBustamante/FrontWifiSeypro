@@ -65,5 +65,15 @@ const Ventas = {
     `)
         return client.query({query, variables: {id}, fetchPolicy: 'no-cache'})
     },
+    anularComprobante: (id, motivo) => {
+        const query = gql(`
+      query anularOperacion($id: String!, $motivo: String!){
+       anularOperacion(id: $id, motivo: $motivo){
+            success
+        }
+     }
+    `)
+        return client.query({query, variables: {id, motivo}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Ventas

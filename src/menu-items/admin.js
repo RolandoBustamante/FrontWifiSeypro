@@ -1,4 +1,4 @@
-import {IconUser, IconUserSearch, IconBrandWhatsapp,IconUserCircle} from '@tabler/icons'
+import {IconUser, IconUserSearch, IconBrandWhatsapp,IconUserCircle, IconUserMinus} from '@tabler/icons'
 const admin={
     id: 'admin',
     title: 'Administrador',
@@ -34,6 +34,14 @@ const admin={
             type: 'item',
             url: '/admin/whatsapp',
             icon: IconBrandWhatsapp,
+            breadcrumbs: false
+        },
+        {
+            id:'admin-nro-aviso',
+            title: 'Números avisos',
+            type: 'item',
+            url: '/admin/nro-aviso',
+            icon: IconUserMinus,
             breadcrumbs: false
         }
     ]

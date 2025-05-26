@@ -95,7 +95,7 @@ export default function Facturador() {
                 const validaDni = utilvalidarDni(infoCliente.documento_identidad)
                 setComprobante('03')
                 if (validaDni.success) setTipoDocumento('1')
-                else setTipoDocumento('6')
+                else setTipoDocumento('0')
             }
         }
         if (infoCliente.provincia && infoCliente.departamento && infoCliente.distrito) {
@@ -367,6 +367,12 @@ export default function Facturador() {
         if (bancarizado && (doc === '' || !doc)) {
             Toast.Error('Debes cargar el comprobante de pago');
             return;
+        }
+        const descripciones = detalle.map((d) => d.descripcion);
+        const repetidas = descripciones.filter((desc, idx, arr) => arr.indexOf(desc) !== idx);
+        if (repetidas.length) {
+            Toast.Error(`Hay periodos repetidos`);
+            return
         }
         const jsonFinal = generarJsonComprobante();
         Toast.Waiting('Emitiendo comprobante de pago')

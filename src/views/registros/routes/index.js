@@ -7,6 +7,7 @@ import Routers from "../../../Models/Routers";
 import ModalRoute from "./components/ModalRoute";
 import Label from "../../../components/label";
 import DocumentViewer from "../../../components/DocumentosViewer";
+import useInput from "../../../customHooks/useInput";
 
 
 const Rastreador = () => {
@@ -24,6 +25,19 @@ const Rastreador = () => {
     const [page, setPage] = useState(null)
     const [limit, setLimit] = useState(10)
     const [loading, setLoading] = useState(false)
+    const [time, setTime]= useState(0)
+
+    const [buscar, inputBuscar] = useInput({
+        typeState: 'text', initialState: '', placeholder: 'Buscar...'
+    })
+    useEffect(()=>{
+        setTimeout(()=>{
+            setTime(0)
+        },time*1000)
+    },[time])
+    useEffect(() => {
+        setTime(3)
+    }, [buscar])
 
     useEffect(() => {
         Usuario.allSedes().then(response => {
@@ -36,15 +50,16 @@ const Rastreador = () => {
         setConfig({...config, isOpen: true})
     }
     useEffect(() => {
+        if(time>0) return
         setLoading(true)
-        Routers.listRouters(page, limit)
+        Routers.listRouters(page, limit, buscar)
             .then(response=>{
                 const {allRouters, info} = response.data.listRouters.data
                 setData(allRouters)
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [page, limit])
+    }, [page, limit, time, buscar])
     const [documentos, setDocumentos]= useState([])
     const [configView, setConfigView]= useState(false)
     const handleIconClick=(url, nombre)=>{
@@ -56,6 +71,9 @@ const Rastreador = () => {
         <Container>
             <Card>
                 <CardContent>
+                    <Box display="flex" justifyContent="flex-start" width="100%" marginTop={2}>
+                        <Box>{inputBuscar}</Box>
+                    </Box>
                     <Box display="flex" justifyContent="center" marginTop={2}>
                         <Button
                             variant="contained"
