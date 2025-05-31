@@ -30,9 +30,9 @@ const Servicios= ()=>{
         placeholder: 'Código pago', disabled: true
     })
     const [usuario, selectUsuario, setUsuario, ]= useAsyncSelect({
-        labelPlace:'Vendedor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
+        labelPlace:'Repartidor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
     })
-    const [emitir, switchEmitir,setSwitch] = useSwitch({initialState: true})
+    const [emitir, switchEmitir,setSwitch] = useSwitch({initialState: false})
 
     useEffect(()=>{
         if(routerSelect && esUUID(routerSelect)){
@@ -117,7 +117,7 @@ const Servicios= ()=>{
                                 setFechaInicio(moment().format('YYYY-MM-DD'))
                                 setRouterSelect('')
                                 setRouterCliente('')
-                                setSwitch(true)
+                                setSwitch(false)
                             }}
                         >
                             Cancelar

@@ -24,7 +24,7 @@ const Sim = () => {
     })
     const [time, setTime]= useState(0)
     useEffect(() => {
-        setTime(3)
+        setTime(2)
     }, [buscar])
     useEffect(()=>{
         setTimeout(()=>{
@@ -42,7 +42,7 @@ const Sim = () => {
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [buscar, time])
+    }, [time])
 
     const editChip = (row) => {
         setChip(row)

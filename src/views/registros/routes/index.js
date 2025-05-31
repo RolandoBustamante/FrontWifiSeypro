@@ -36,7 +36,7 @@ const Rastreador = () => {
         },time*1000)
     },[time])
     useEffect(() => {
-        setTime(3)
+        setTime(2)
     }, [buscar])
 
     useEffect(() => {
@@ -59,7 +59,7 @@ const Rastreador = () => {
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [page, limit, time, buscar])
+    }, [page, limit, time])
     const [documentos, setDocumentos]= useState([])
     const [configView, setConfigView]= useState(false)
     const handleIconClick=(url, nombre)=>{

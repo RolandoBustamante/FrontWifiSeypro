@@ -72,6 +72,16 @@ const Clientes={
         }
         `)
         return client.query({query,variables:{driveId}, fetchPolicy: 'no-cache'})
-    }
+    },
+    listaClientesRoutersAll: (page, limit, param)=>{
+        const query=gql(`
+            query listaClientesRoutersAllClientes($page: Int, $limit: Int, $param: String){
+                listaClientesRoutersAll(page: $page, limit: $limit, param: $param){
+                    data
+                }
+            }
+        `)
+        return client.query({query, variables: {page, limit, param}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Clientes

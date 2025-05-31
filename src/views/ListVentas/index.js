@@ -8,9 +8,14 @@ import CustomTable from "../../utilsComponents/CustomTable";
 import DialogPdfViewer from "../../components/DialogPdfViewer";
 import Toast from "../../utils/toastUtil";
 import Swal from "sweetalert2";
+import Label from "../../components/label";
 
 
 const ListVentas = () => {
+    const colorState = {
+        ACEPTADO: 'success',
+        ANULADO: 'error',
+    };
     const [dialogOpen, setDialogOpen] = useState(false);
     const [pdfUrl, setPdfUrl] = useState('');
     const [data, setData] = useState([])
@@ -75,6 +80,16 @@ const ListVentas = () => {
                                 align: 'center'
                             },
                             {
+                                header: 'Estado',
+                                Cell:(row)=>{
+                                    const {estado}= row
+                                    return (<Label variant="soft" color={colorState[estado.toUpperCase()]} sx={{textTransform: 'capitalize'}}>
+                                        {estado}
+                                    </Label>)
+                                },
+                                align: "center",
+                            },
+                            {
                                 header: 'Acción', align: 'center', Cell: (row) => (
 
                                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
@@ -91,7 +106,7 @@ const ListVentas = () => {
                                                 <Icon icon="mdi:file-pdf-box" color="red" width={24} height={24}/>
                                             </IconButton>
                                         </Tooltip>
-                                        <Tooltip title="Dar de baja">
+                                        {row.estado!=='ANULADO' &&<Tooltip title="Dar de baja">
                                             <IconButton onClick={async () => {
                                                 const { value: motivo } = await Swal.fire({
                                                     title: 'Motivo de la baja',
@@ -124,7 +139,7 @@ const ListVentas = () => {
                                             }}>
                                                 <Icon icon="mdi:file-cancel-outline" color="orange" width={24} height={24} />
                                             </IconButton>
-                                        </Tooltip>
+                                        </Tooltip>}
                                     </div>
                                    )
                             },

@@ -71,7 +71,7 @@ const Cliente = () => {
         },time*1000)
     },[time])
     useEffect(() => {
-        setTime(3)
+        setTime(2)
     }, [buscar])
     useEffect(()=>{
         if(routerSelect && esUUID(routerSelect)){
@@ -95,7 +95,7 @@ const Cliente = () => {
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [limit, page, buscar, time])
+    }, [limit, page, time])
     const editCliente = (row) => {
         setCliente(row)
         setConfig({...config, isOpen: true})

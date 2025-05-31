@@ -10,6 +10,7 @@ const VehiculoPage= Loadable(lazy(()=>import('views/registros/vehiculos')))
 const RoutePage= Loadable(lazy(()=>import('views/registros/routes')))
 const SimsPage= Loadable(lazy(()=>import('views/registros/chips')))
 const ServiciosPage= Loadable(lazy(()=>import('views/registros/servicios')))
+const ClienteServicioPage= Loadable(lazy(()=>import('views/ClientesServicio')))
 
 const RegistrosRoute={
     path:'/registro',
@@ -34,6 +35,10 @@ const RegistrosRoute={
         {
             path: 'sims',
             element: <SimsPage/>
+        },
+        {
+            path: 'clientes-servicio',
+            element: <ClienteServicioPage/>
         },
         {
             path: 'ventas',

@@ -1,4 +1,4 @@
-import {IconUserPlus, IconWifi2, IconCashBanknote, IconDeviceSim, IconBrandShopee} from '@tabler/icons'
+import {IconUserPlus, IconWifi2, IconCashBanknote, IconDeviceSim, IconBrandShopee, IconDeviceTablet} from '@tabler/icons'
 const registro={
     id: 'registro',
     title: 'Registros',
@@ -34,6 +34,14 @@ const registro={
             type: 'item',
             url: '/registro/servicios',
             icon: IconBrandShopee,
+            breadcrumbs: false
+        },
+        {
+            id:'admin-cliente-servicio',
+            title: 'Clientes-Servicio',
+            type: 'item',
+            url: '/registro/clientes-servicio',
+            icon: IconDeviceTablet,
             breadcrumbs: false
         },
 

@@ -138,13 +138,13 @@ export function esUUID(str) {
     return uuidRegex.test(str);
 }
 
-export const uploadImg = (file, type, name = null,) => {
+export const uploadImg = async (file, type, name = null) => {
     const formData = new FormData()
     formData.append('img', file)
     formData.append('type', type)
     formData.append('name', name ? name.toString().split('.')[0] : null)
 
-    return fetch(`${HOST_API_KEY}/uploadDrive`, {
+    return await fetch(`${HOST_API_KEY}/uploadDrive`, {
         method: 'POST',
         headers: {
             authorization: `Bearer ${localStorage.getItem('accessToken')}`
