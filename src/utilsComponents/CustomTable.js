@@ -42,7 +42,7 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
     }
     const [limite, setLimite] = useState(10)
 
-    const {prev, next, pages} = info ?? {};
+    const {prev, next, pages, count} = info ?? {};
     const handlePagination = (p) => {
         setPage(p)
     }
@@ -185,7 +185,7 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
                         </span>
                         </Tooltip>
                         <Typography variant="overline" color="secondary">
-                            Página {(pages && prev + 1) || 0} de {pages || 0}
+                            Página {(pages && prev + 1) || 0} de {pages || 0} &nbsp;|&nbsp; Total: {count ?? 0}
                         </Typography>
                         <Tooltip title="SIGUIENTE" placement="right">
                         <span>

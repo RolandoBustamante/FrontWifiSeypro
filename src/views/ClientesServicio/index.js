@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Container } from "@mui/material";
 import Clientes from "../../Models/Clientes";
 import useInput from "../../customHooks/useInput";
 import moment from "moment";
+import ModalAnular from "../ModalAnular/ModalAnular";
 
 const RastreadorRouters = () => {
     const [data, setData] = useState([]);
@@ -14,6 +15,9 @@ const RastreadorRouters = () => {
     const [param, inputParam]= useInput({
         placeholder:'Buscar por cliente, IMEI, chip o DNI'
     })
+    const [config, setConfig] = useState({isOpen: false})
+    const [id, setId]= useState(null)
+    const [sede, setSede]= useState(null)
     const [time, setTime]= useState(0)
     useEffect(()=>{
         setTime(2)
@@ -33,6 +37,11 @@ const RastreadorRouters = () => {
             setLoading(false);
         });
     }, [page, limit, time]);
+    const remove=(row)=>{
+        setId(row.value)
+        setSede(row.sede_id)
+        setConfig({...config, isOpen: true})
+    }
 
     return (
         <Container>
@@ -50,6 +59,17 @@ const RastreadorRouters = () => {
                         setPage={setPage}
                         pagination
                         columns={[
+                            {
+                                header: 'Acciones',
+                                buttons: [
+                                    {
+                                        icon: 'mdi:trash-can',
+                                        onClick: (row) => remove(row),
+                                        color: "error",
+                                    }
+                                ],
+                                align: "center",
+                            },
                             {
                                 header: 'Fecha Pago',
                                 accessor: 'nombres',
@@ -83,6 +103,7 @@ const RastreadorRouters = () => {
                     />
                 </CardContent>
             </Card>
+            <ModalAnular config={config} setConfig={setConfig} id={id} sede_id={sede}/>
         </Container>
     );
 };

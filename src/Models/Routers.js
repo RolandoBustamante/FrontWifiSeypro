@@ -5,15 +5,15 @@ import apollo from '../utils/apollo';
 const client = apollo;
 
 const Routers={
-    listRouters: (page, limit, imei)=>{
-        const query=gql(`
-            query listRouters($page: Int, $limit: Int, $imei: String){
-                listRouters(page: $page, limit: $limit, imei: $imei){
-                    data
-                }
+    listRouters: (page, limit, imei, sede, estado)=>{
+        const query = gql(`
+          query listRouters($page: Int, $limit: Int, $imei: String, $sede: String, $estado: String) {
+            listRouters(page: $page, limit: $limit, imei: $imei, sede: $sede, estado: $estado) {
+              data
             }
-        `)
-        return client.query({query, variables: {page, limit, imei}, fetchPolicy: 'no-cache'})
+          }
+        `);
+        return client.query({query, variables: {page, limit, imei, sede, estado}, fetchPolicy: 'no-cache'})
     },
     createOrUpdateRouters: (data)=>{
         const mutation=gql(`mutation createOrUpdateRouters($data: JSONObject!){
@@ -63,6 +63,14 @@ const Routers={
         }
         `)
         return client.query({query, variables:{id}, fetchPolicy: 'no-cache'})
-    }
+    },
+    cancelarClienteRouter: (data)=>{
+        const query=gql(`query cancelarClienteRouter($data: JSONObject!){
+            cancelarClienteRouter(data: $data){
+                success
+            }
+        }`)
+        return client.query({query, variables:{data}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Routers

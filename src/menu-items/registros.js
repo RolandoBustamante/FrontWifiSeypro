@@ -40,7 +40,7 @@ const registro={
             id:'admin-cliente-servicio',
             title: 'Clientes-Servicio',
             type: 'item',
-            url: '/registro/clientes-servicio',
+            url: '/registro/cliente-servicio',
             icon: IconDeviceTablet,
             breadcrumbs: false
         },

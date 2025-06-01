@@ -37,7 +37,7 @@ const RegistrosRoute={
             element: <SimsPage/>
         },
         {
-            path: 'clientes-servicio',
+            path: 'cliente-servicio',
             element: <ClienteServicioPage/>
         },
         {
