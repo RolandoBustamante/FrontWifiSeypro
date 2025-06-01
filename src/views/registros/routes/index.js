@@ -41,7 +41,7 @@ const Rastreador = () => {
             {value: 'LIBRE', label: 'LIBRE'},
             {value: 'ELIMINADO', label: 'ELIMINADO'},
             {value: 'DEVUELTO', label: 'DEVUELTO'},
-            {value: 'NO DEVUELTO', label: 'NO DEVUELTO'},
+            {value: 'NO DEVUELTO', label: 'NODEVUELTO'},
             {value: 'MALOGRADO', label: 'MALOGRADO'},
             {value: 'USADO', label: 'USADO'}
         ],

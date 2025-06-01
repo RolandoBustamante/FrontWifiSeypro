@@ -22,7 +22,7 @@ const ModalAnular = ({config, sede_id, id, setConfig}) => {
     })
     const [estado, selectEstado, ] = useSelect({
         placeholder: 'Motivo',
-        optionsState: [{value: 'MALOGRADO', label: 'MALOGRADO'}, {value: 'DEVUELTO', label: 'DEVUELTO'}, {value: 'NO DEVUELTO', label: 'NO DEVUELTO'}],
+        optionsState: [{value: 'MALOGRADO', label: 'MALOGRADO'}, {value: 'DEVUELTO', label: 'DEVUELTO'}, {value: 'NODEVUELTO', label: 'NO DEVUELTO'}],
         initialState: ''
     })
     const [observacion, inputObservacion, ] = useInput({
