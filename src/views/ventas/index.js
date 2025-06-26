@@ -32,7 +32,8 @@ import DialogPdfViewer from "../../components/DialogPdfViewer";
 
 const tiposComprobante = [
     {value: '01', label: 'Factura'},
-    {value: '03', label: 'Boleta'}
+    {value: '03', label: 'Boleta'},
+    {value: '04', label: 'Nota de Venta'}
 ];
 
 
@@ -50,6 +51,10 @@ export default function Facturador() {
     const [fecha, inputFecha] = useInput({
         typeState: 'date',
         placeholder: 'Fecha Emisión', initialState: moment().format('YYYY-MM-DD')
+    });
+    const [nroOperacion, inputNumeroOperacion] = useInput({
+        typeState: 'text',
+        placeholder: 'N° Operación'
     });
     const [moneda, inputMoneda] = useInput({typeState: 'select', initialState: 'PEN', placeholder: 'Moneda'});
 
@@ -91,7 +96,8 @@ export default function Facturador() {
                 setTipoDocumento('6')
                 setComprobante('01')
             } else {
-                setOptionsComprobante([{value: '03', label: 'Boleta'}])
+                setOptionsComprobante([{value: '03', label: 'Boleta'},{value: '04', label: 'Nota de Venta'}
+                ])
                 const validaDni = utilvalidarDni(infoCliente.documento_identidad)
                 setComprobante('03')
                 if (validaDni.success) setTipoDocumento('1')
@@ -330,7 +336,7 @@ export default function Facturador() {
         if (tipoPago) setBancarizado((ventasTipo.find(element => element.id === tipoPago)).bancarizado)
     }, [tipoPago])
     useEffect(() => {
-        setSize(bancarizado ? 3 : 4)
+        setSize(bancarizado ? 2 : 4)
     }, [bancarizado])
 
     const enviar = async () => {
@@ -368,6 +374,10 @@ export default function Facturador() {
             Toast.Error('Debes cargar el comprobante de pago');
             return;
         }
+        if (bancarizado && (nroOperacion === '' || !nroOperacion)) {
+            Toast.Error('Debes ingresar el número de operación ');
+            return;
+        }
         const descripciones = detalle.map((d) => d.descripcion);
         const repetidas = descripciones.filter((desc, idx, arr) => arr.indexOf(desc) !== idx);
         if (repetidas.length) {
@@ -377,7 +387,7 @@ export default function Facturador() {
         const jsonFinal = generarJsonComprobante();
         Toast.Waiting('Emitiendo comprobante de pago')
         setIsLoading(true)
-        const response =(await Ventas.emitirFactura({jsonFinal, doc, tipoPago, views, clienteRouter}))
+        const response =(await Ventas.emitirFactura({jsonFinal, doc, tipoPago, views, clienteRouter, nroOperacion}))
         const res= response?.data?.emitirFactura??{}
         if (res?.data?.success && res?.data?.pdfUrl) {
             setPdfUrl(res.data.pdfUrl);
@@ -399,8 +409,11 @@ export default function Facturador() {
                 <Grid item xs={size}>{inputSerie}</Grid>
                 <Grid item xs={size}>{inputCorrelativo}</Grid>
                 <Grid item xs={size}>{selectTipoPago}</Grid>
-                {bancarizado && <Grid item xs={3}>
-                    <MyDropzone onDrop={onDrop} placeholder="Recibo"/>
+                {bancarizado && <Grid item xs={6}>
+                    <Grid container spacing={2} alignItems="center" mb={2}>
+                        <Grid item xs={6}> <MyDropzone onDrop={onDrop} placeholder="Recibo"/></Grid>
+                        <Grid item xs={6}> {inputNumeroOperacion}</Grid>
+                    </Grid>
                 </Grid>}
             </Grid>
             <Grid container justifyContent="center" mt={2} style={{paddingBottom: 5}}>

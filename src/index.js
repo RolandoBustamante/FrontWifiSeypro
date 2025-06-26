@@ -12,6 +12,7 @@ import { store } from 'store';
 // style + assets
 import 'assets/scss/style.scss';
 import config from './config';
+import ErrorBoundary from './ErrorBoundary';
 
 // ==============================|| REACT DOM RENDER  ||============================== //
 
@@ -20,7 +21,9 @@ const root = createRoot(container); // createRoot(container!) if you use TypeScr
 root.render(
   <Provider store={store}>
     <BrowserRouter basename={config.basename}>
-      <App />
+        <ErrorBoundary>
+            <App />
+        </ErrorBoundary>
     </BrowserRouter>
   </Provider>
 );

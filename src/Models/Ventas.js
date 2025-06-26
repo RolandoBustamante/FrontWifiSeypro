@@ -41,10 +41,10 @@ const Ventas = {
     `)
         return client.query({query, variables: {url, numero}, fetchPolicy: 'no-cache'})
     },
-    operacionesSimplificadas: () => {
+    operacionesSimplificadas: (page, limit,buscar) => {
         const query = gql(`
-    query listOperaciones {
-      listOperaciones {
+    query listOperaciones ($page: Int,$limit: Int, $buscar: String){
+      listOperaciones (page:$page, limit: $limit, buscar: $buscar){
         data
       }
     }
@@ -52,6 +52,7 @@ const Ventas = {
 
         return client.query({
             query,
+            variables:{page, limit,buscar,},
             fetchPolicy: 'no-cache'
         });
     },
@@ -74,6 +75,16 @@ const Ventas = {
      }
     `)
         return client.query({query, variables: {id, motivo}, fetchPolicy: 'no-cache'})
+    },
+    getResumenCaja: (data) => {
+        const query = gql(`
+      query resumenCaja($data: JSONObject!){
+       resumenCaja(data: $data){
+            data
+        }
+     }
+    `)
+        return client.query({query, variables: {data}, fetchPolicy: 'no-cache'})
     },
 }
 export default Ventas

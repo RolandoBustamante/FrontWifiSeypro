@@ -27,6 +27,8 @@ import {esUUID} from "../../../utils/utils";
 import Ventas from "../../../Models/Ventas";
 import Toast from "../../../utils/toastUtil";
 import DocumentViewer from "../../../components/DocumentosViewer";
+import Swal from 'sweetalert2';
+
 
 
 const Cliente = () => {
@@ -37,56 +39,57 @@ const Cliente = () => {
     const [page, setPage] = useState(null)
     const [limit, setLimit] = useState(10)
     const [loading, setLoading] = useState(false)
-    const [configColapse, setConfigColapse]= useState(false)
-    const [clienteCollapse, setClienteCollapse]= useState({})
-    const [router, setRouter]= useState({})
-    const [routerSelect, selectRouter, setRouterSelect, ,setOptionsSelectRouter,,,,setDisabledRouter]= useAsyncSelect({
-        labelPlace:'Router', modelo: {Model:Routers, respuesta: 'routersParam', getByParam: 'getByParam'},
+    const [configColapse, setConfigColapse] = useState(false)
+    const [clienteCollapse, setClienteCollapse] = useState({})
+    const [router, setRouter] = useState({})
+    const [routerSelect, selectRouter, setRouterSelect, , setOptionsSelectRouter, , , , setDisabledRouter] = useAsyncSelect({
+        labelPlace: 'Router', modelo: {Model: Routers, respuesta: 'routersParam', getByParam: 'getByParam'},
     })
-    const [fechaInicio, inputFechaInicio, setFechaInicio]= useInput({
+    const [fechaInicio, inputFechaInicio, setFechaInicio] = useInput({
         typeState: 'date', placeholder: 'Fecha Contrato', initialState: moment().format('YYYY-MM-DD')
     })
-    const [, inputMonto, setMonto]= useInput({
-         placeholder: 'Monto', disabled: true
+    const [, inputMonto, setMonto] = useInput({
+        placeholder: 'Monto', disabled: true
     })
-    const [, inputCodigoPago, setCodigoPago]= useInput({
+    const [, inputCodigoPago, setCodigoPago] = useInput({
         placeholder: 'Código pago', disabled: true
     })
-    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario,,,,setDisableUsuario]= useAsyncSelect({
-        labelPlace:'Vendedor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
+    const [usuario, selectUsuario, setUsuario, , setOptionsUsuario, , , , setDisableUsuario] = useAsyncSelect({
+        labelPlace: 'Vendedor', modelo: {Model: Vendedores, respuesta: 'vendedoresParam'},
     })
     const colorState = {
         ACTIVO: 'success',
         BLOQUEADO: 'error',
         INACTIVO: 'error',
+        DEUDOR: 'error'
     };
-    const [time, setTime]= useState(0)
+    const [time, setTime] = useState(0)
 
     const [buscar, inputBuscar] = useInput({
         typeState: 'text', initialState: '', placeholder: 'Buscar...'
     })
-    useEffect(()=>{
-        setTimeout(()=>{
+    useEffect(() => {
+        setTimeout(() => {
             setTime(0)
-        },time*1000)
-    },[time])
+        }, time * 1000)
+    }, [time])
     useEffect(() => {
         setTime(2)
     }, [buscar])
-    useEffect(()=>{
-        if(routerSelect && esUUID(routerSelect)){
+    useEffect(() => {
+        if (routerSelect && esUUID(routerSelect)) {
             Routers.getById(routerSelect, 'codigo, precio_servicio')
-                .then(response=>{
-                    const routerId= response.data.routerById
-                    setCodigoPago(routerId.codigo??'')
-                    setMonto(routerId.precio_servicio??'')
+                .then(response => {
+                    const routerId = response.data.routerById
+                    setCodigoPago(routerId.codigo ?? '')
+                    setMonto(routerId.precio_servicio ?? '')
                 })
         }
-    },[routerSelect])
+    }, [routerSelect])
 
 
     useEffect(() => {
-        if(time>0)
+        if(time>0) return
         setLoading(true)
         Clientes.listaClientes(page, limit, buscar)
             .then(response => {
@@ -100,12 +103,12 @@ const Cliente = () => {
         setCliente(row)
         setConfig({...config, isOpen: true})
     }
-    const editRouter=(row)=>{
+    const editRouter = (row) => {
         setRouter(row)
         setConfigColapse(true)
     }
-    useEffect(()=>{
-        const routerEdit= router.router??null
+    useEffect(() => {
+        const routerEdit = router.router ?? null
         setDisabledRouter(false)
         setDisableUsuario(false)
         setOptionsSelectRouter([])
@@ -115,43 +118,51 @@ const Cliente = () => {
         setMonto('')
         setCodigoPago('')
 
-        if(routerEdit){
+        if (routerEdit) {
             setOptionsSelectRouter([{value: routerEdit.id, label: `${routerEdit.marca}-${routerEdit.imei}`}])
             setRouterSelect(routerEdit.id)
             setDisabledRouter(true)
         }
-        const vendedorEdit= router?.ventas? router.ventas[0].vendedor??null:null
+        const vendedorEdit = router?.ventas ? router.ventas[0].vendedor ?? null : null
 
-        if(vendedorEdit){
-            setOptionsUsuario([{value: vendedorEdit.id, label: `${vendedorEdit.documento_identidad}-${vendedorEdit.nombres}`}])
+        if (vendedorEdit) {
+            setOptionsUsuario([{
+                value: vendedorEdit.id,
+                label: `${vendedorEdit.documento_identidad}-${vendedorEdit.nombres}`
+            }])
             setUsuario(vendedorEdit.id)
             setDisableUsuario(true)
         }
-        setFechaInicio(router.fecha_inicio?? moment().format('YYYY-MM-DD'))
-    },[router])
-    const guardarRouterCliente= async ()=>{
+        setFechaInicio(router.fecha_inicio ?? moment().format('YYYY-MM-DD'))
+    }, [router])
+    const guardarRouterCliente = async () => {
         Toast.Waiting('Guardando...')
-        let data={cliente_id: clienteCollapse.id, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario}
-        if(router.id) data={...data, id: router.id}
+        let data = {
+            cliente_id: clienteCollapse.id,
+            router_id: routerSelect,
+            fecha_inicio: fechaInicio,
+            vendedor: usuario
+        }
+        if (router.id) data = {...data, id: router.id}
         try {
             await Ventas.createOrUpdateRouters(data)
             Toast.Remove()
             Toast.Success('Guardado exitoso')
             window.location.reload()
-        }catch (e) {
+        } catch (e) {
             Toast.Remove()
             Toast.Error(e.message)
 
         }
     }
-    const handleCheckboxChange= async (gratis, id, setGratis)=>{
-        Ventas.updateFree(id, gratis).then(()=>{
+    const handleCheckboxChange = async (gratis, id, setGratis) => {
+        Ventas.updateFree(id, gratis).then(() => {
             setGratis(gratis)
         })
     }
     const rowCollapse = (row) => {
         setClienteCollapse(row)
-        const dataRow= row.cliente_routers??[]
+        const dataRow = row.cliente_routers ?? []
         return (
             <>
                 <Box display="flex" justifyContent="center" marginTop={2}>
@@ -160,7 +171,7 @@ const Cliente = () => {
                         color="secondary"
                         type="submit"
                         style={{margin: 3}}
-                        onClick={()=> {
+                        onClick={() => {
                             setConfigColapse(true)
                             setRouter({})
                         }}
@@ -168,7 +179,7 @@ const Cliente = () => {
                         <Icon icon="mdi:plus-circle"/> Nuevo Router
                     </Button>
                 </Box>
-                <ReactTablePagination data={dataRow}  columns={[
+                <ReactTablePagination data={dataRow} columns={[
                     {
                         header: 'Acciones',
                         buttons: [
@@ -182,14 +193,14 @@ const Cliente = () => {
                     },
                     {
                         header: 'Excluir Pago',
-                        Cell:(row)=>{
-                            const [free, setFree]= useState(row.gratis?? false)
-                            return(
-                                    <input
-                                        type="checkbox"
-                                        checked={free}
-                                        onChange={(e)=>handleCheckboxChange(e.target.checked, row.id, setFree)}
-                                    />
+                        Cell: (row) => {
+                            const [free, setFree] = useState(row.gratis ?? false)
+                            return (
+                                <input
+                                    type="checkbox"
+                                    checked={free}
+                                    onChange={(e) => handleCheckboxChange(e.target.checked, row.id, setFree)}
+                                />
                             )
 
                         },
@@ -202,7 +213,7 @@ const Cliente = () => {
                         align: "center",
                         Cell: (row) => {
                             const {imei} = row.router
-                            return (<div>{imei??''}</div>)
+                            return (<div>{imei ?? ''}</div>)
                         },
                     },
                     {
@@ -211,7 +222,7 @@ const Cliente = () => {
                         align: "center",
                         Cell: (row) => {
                             const {codigo} = row.router
-                            return (<div>{codigo??''}</div>)
+                            return (<div>{codigo ?? ''}</div>)
                         },
                     },
                     {
@@ -220,8 +231,8 @@ const Cliente = () => {
                         align: "center",
                         Cell: (row) => {
                             const {chips} = row.router
-                            const chipsValidos= chips.find(element=>element.activo && element.usado)
-                            return (<div>{chipsValidos?.sim_card??''}</div>)
+                            const chipsValidos = chips.find(element => element.activo && element.usado)
+                            return (<div>{chipsValidos?.sim_card ?? ''}</div>)
                         },
                     },
                     {
@@ -230,7 +241,7 @@ const Cliente = () => {
                         align: "center",
                         Cell: (row) => {
                             const {marca} = row.router
-                            return (<div>{marca??''}</div>)
+                            return (<div>{marca ?? ''}</div>)
                         },
                     },
                     {
@@ -239,19 +250,19 @@ const Cliente = () => {
                         align: "center",
                         Cell: (row) => {
                             const {modelo} = row.router
-                            return (<div>{modelo??''}</div>)
+                            return (<div>{modelo ?? ''}</div>)
                         },
                     },
                 ]}/>
             </>
         )
     }
-    const [documentos, setDocumentos]= useState([])
-    const [configView, setConfigView]= useState(false)
-    const handleIconClick=(dni_back, dni_front)=>{
-        const document=[]
-        if(dni_front)document.push({nombre:'DNI Frontal', url: dni_front})
-        if(dni_back)document.push({nombre: 'DNI Reverso', url: dni_back})
+    const [documentos, setDocumentos] = useState([])
+    const [configView, setConfigView] = useState(false)
+    const handleIconClick = (dni_back, dni_front) => {
+        const document = []
+        if (dni_front) document.push({nombre: 'DNI Frontal', url: dni_front})
+        if (dni_back) document.push({nombre: 'DNI Reverso', url: dni_back})
         setDocumentos(document)
         setConfigView(true)
     }
@@ -320,8 +331,9 @@ const Cliente = () => {
                         {
                             header: ' ',
                             Cell: (row) => {
-                                const {dni_back, dni_front} = row
-                                return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                const {dni_back, dni_front, deudas} = row
+                                const esDeudor = deudas && deudas.length > 0 && deudas.some(element => element.estado === 'PENDIENTE')
+                                return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                                     {(dni_back || dni_front) && (
                                         <IconButton
                                             title="Ver detalle"
@@ -341,6 +353,34 @@ const Cliente = () => {
                                             />
                                         </IconButton>
                                     )}
+                                    {
+                                        esDeudor&& (
+                                            <IconButton
+                                                title="Ver detalle"
+                                                component="label"
+                                                onClick={() => {
+                                                    Swal.fire({
+                                                        title: 'Deuda pendiente',
+                                                        text:`${deudas[0].motivo}\n MONTO: ${deudas[0].monto}\n FECHA: ${moment(deudas[0].fecha).format('YYYY-MM-DD')}` ,
+                                                        icon: 'warning',
+                                                        confirmButtonText: 'Entendido'
+                                                    });
+                                                }}
+                                                style={{
+                                                    padding: 0,
+                                                    margin: 0,
+                                                }}
+                                            >
+                                                <Icon
+                                                    icon="mdi:currency-usd-off"
+                                                    style={{
+                                                        fontSize: 18,
+                                                        color: 'inherit'
+                                                    }}
+                                                />
+                                            </IconButton>
+                                        )
+                                    }
                                 </div>
                             },
                             cellStyle: {minWidth: '3px'},
@@ -361,10 +401,13 @@ const Cliente = () => {
                             header: 'Estado',
                             accessor: 'estado',
                             align: "center",
-                            Cell: (row)=>{
-                                const {estado}= row
-                                return <Label variant="soft" color={colorState[estado.toUpperCase()]} sx={{textTransform: 'capitalize'}}>
-                                    {estado}
+                            Cell: (row) => {
+                                const {estado, deudas} = row
+                                const esDeudor = deudas && deudas.length > 0 && deudas.some(element => element.estado === 'PENDIENTE')
+                                const labelEstado = esDeudor ? 'DEUDOR' : estado.toUpperCase()
+                                return <Label variant="soft" color={colorState[labelEstado]}
+                                              sx={{textTransform: 'capitalize'}}>
+                                    {labelEstado}
                                 </Label>
                             }
                         },
@@ -383,28 +426,29 @@ const Cliente = () => {
                         }, {
                             header: 'Departamento',
                             Cell: (row) => {
-                                const {departamento} = row
-                                return (
-                                    <div>{(departamentos.find(el => el.id_ubigeo === departamento))['nombre_ubigeo']}</div>)
+                                const { departamento } = row;
+                                const encontrado = departamentos.find(el => el.id_ubigeo === departamento);
+                                return <div>{encontrado ? encontrado.nombre_ubigeo : '-'}</div>;
                             },
                             align: "center",
-                        }, {
+                        },
+                        {
                             header: 'Provincia',
                             Cell: (row) => {
-                                const {departamento, provincia} = row
-                                return (<div>
-                                    {(provincias[departamento].find(el => el.id_ubigeo === provincia))['nombre_ubigeo']}
-                                </div>)
+                                const { departamento, provincia } = row;
+                                const listaProvincias = provincias[departamento] || [];
+                                const encontrado = listaProvincias.find(el => el.id_ubigeo === provincia);
+                                return <div>{encontrado ? encontrado.nombre_ubigeo : '-'}</div>;
                             },
                             align: "center",
                         },
                         {
                             header: 'Distrito',
                             Cell: (row) => {
-                                const {provincia, distrito} = row
-                                return (<div>
-                                    {(distritos[provincia].find(el => el.id_ubigeo === distrito))['nombre_ubigeo']}
-                                </div>)
+                                const { provincia, distrito } = row;
+                                const listaDistritos = distritos[provincia] || [];
+                                const encontrado = listaDistritos.find(el => el.id_ubigeo === distrito);
+                                return <div>{encontrado ? encontrado.nombre_ubigeo : '-'}</div>;
                             },
                             align: "center",
                         }

@@ -95,7 +95,7 @@ const RastreadorRouters = () => {
                                 align: 'center'
                             },
                             {
-                                header: 'SIM',
+                                header: 'SIM-CARD',
                                 accessor: 'sim_card',
                                 align: 'center'
                             },

@@ -42,7 +42,7 @@ const Sim = () => {
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [time])
+    }, [time, limit, page])
 
     const editChip = (row) => {
         setChip(row)
@@ -90,8 +90,12 @@ const Sim = () => {
                         </Button>
 
                     </Box>
-                    <ReactTablePagination data={data} setLimit={setLimit} loading={loading} info={infoData}
-                                          setPage={setPage} pagination columns={[
+                    <ReactTablePagination data={data}
+                                          setLimit={setLimit}
+                                          loading={loading}
+                                          setPage={setPage}
+                                          info={infoData}
+                                          pagination columns={[
                         {
                             header: '',
                             Cell: (row) => {

@@ -83,7 +83,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
     };
 
     // do not load chart when loading
-    if (!isLoading) {
+    if (!isLoading && chartData?.options) {
       ApexCharts.exec(`bar-chart`, 'updateOptions', newChartData);
     }
   }, [navType, primary200, primaryDark, secondaryMain, secondaryLight, primary, darkLight, grey200, isLoading, grey500]);
@@ -119,7 +119,13 @@ const TotalGrowthBarChart = ({ isLoading }) => {
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              <Chart {...chartData} />
+              {chartData?.series?.length > 0 && chartData?.options ? (
+                  <Chart {...chartData} />
+              ) : (
+                  <Typography variant="body2" color="textSecondary">
+                    No hay datos para mostrar
+                  </Typography>
+              )}
             </Grid>
           </Grid>
         </MainCard>

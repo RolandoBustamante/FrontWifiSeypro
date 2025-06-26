@@ -29,6 +29,9 @@ const ModalAnular = ({config, sede_id, id, setConfig}) => {
             initialState: '', placeholder: 'Observaciones'
         }
     )
+    const [monto, inputMonto]= useInput({
+        typeState: 'number', placeholder:'Precio deuda', initialState: 200
+    })
 
     useEffect(() => {
         setOptionSedes([])
@@ -56,7 +59,7 @@ const ModalAnular = ({config, sede_id, id, setConfig}) => {
             Toast.Error('Debe seleccionar la sede');
             return;
         }
-        Routers.cancelarClienteRouter({id, sede, observacion, estado})
+        Routers.cancelarClienteRouter({id, sede, observacion, estado, monto})
             .then(()=>{
                 setConfig({...config, isOpen: false})
                 window.location.reload();
@@ -76,6 +79,7 @@ const ModalAnular = ({config, sede_id, id, setConfig}) => {
                     <FormControl style={{flex: 2}}>
                         {selectSede}
                     </FormControl>
+                    {estado==='NODEVUELTO' && <FormControl style={{flex: 2}}>{inputMonto}</FormControl>}
                 </Stack>
                 <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
                     {inputObservacion}

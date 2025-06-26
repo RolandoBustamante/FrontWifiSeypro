@@ -1,6 +1,6 @@
 import AuthGuard from "../auth/AuthGuard";
 import MainLayout from "../layout/MainLayout";
-import ListVentas from "../views/ListVentas";
+import ListVentas from "../views/TabVentas";
 
 const lista={
     path:'/lista',

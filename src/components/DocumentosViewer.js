@@ -1,23 +1,23 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    IconButton,
-    Typography,
-    Tooltip,
-    Box, CircularProgress,
+    Dialog, DialogTitle, DialogContent, IconButton,
+    Typography, Tooltip, Box, CircularProgress,
 } from '@mui/material';
-import {NavigateBeforeRounded, NavigateNextRounded, Close, DownloadRounded} from '@mui/icons-material';
+import {
+    NavigateBeforeRounded, NavigateNextRounded, Close, DownloadRounded
+} from '@mui/icons-material';
 import Clientes from "../Models/Clientes";
 import {HOST_API_KEY} from "../config-global";
+import { lazy, Suspense } from 'react';
+
+const VisorPDFWrapper = lazy(() => import('components/VisorPDFWrapper'));
 
 const DocumentViewer = ({documentos, config, setConfig}) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [fileUrl, setFileUrl] = useState(null);
     const [isImage, setIsImage] = useState(false);
-    const [load, setLoad] = useState(false)
+    const [load, setLoad] = useState(false);
 
     const handleNavigation = (direction) => {
         setCurrentIndex((prev) => prev + direction);
@@ -54,17 +54,15 @@ const DocumentViewer = ({documentos, config, setConfig}) => {
     }, [documentos]);
 
     useEffect(() => {
-        if (!url) return;
-        setLoad(true)
-        Clientes.obtenerRecurso(url)
-            .then(response => {
-                const {label} = response.data.obtenerDrive;
-                fetchFile(label);
-                setLoad(false)
-                return () => {
-                    if (fileUrl) URL.revokeObjectURL(fileUrl);
-                };
-            });
+        if (!url || typeof url !== 'string') return;
+        setLoad(true);
+        Clientes.obtenerRecurso(url).then(response => {
+            const {label} = response.data.obtenerDrive;
+            fetchFile(label).then(() => setLoad(false));
+        });
+        return () => {
+            if (fileUrl) URL.revokeObjectURL(fileUrl);
+        };
     }, [url]);
 
     return (
@@ -72,9 +70,7 @@ const DocumentViewer = ({documentos, config, setConfig}) => {
             open={config}
             onClose={onClose}
             fullWidth
-            PaperProps={{
-                style: {borderRadius: 8, overflow: 'hidden'},
-            }}
+            PaperProps={{style: {borderRadius: 8, overflow: 'hidden'}}}
         >
             {(!Array.isArray(documentos) || documentos.length === 0) ? (
                 <DialogContent>
@@ -83,28 +79,33 @@ const DocumentViewer = ({documentos, config, setConfig}) => {
             ) : (
                 <>
                     <DialogTitle>
-                        <Box display="flex" flexWrap="wrap" justifyContent="space-between" alignItems="center">
-                            <Typography variant="h6" noWrap>
-                                {nombre}
-                            </Typography>
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                            <Typography variant="h6" noWrap>{nombre}</Typography>
                             <Box display="flex" alignItems="center" gap={1}>
                                 {documentos.length > 1 && (
                                     <>
                                         <Tooltip title="Anterior">
-            <span>
-              <IconButton onClick={() => handleNavigation(-1)} disabled={currentIndex === 0} size="small">
-                <NavigateBeforeRounded/>
-              </IconButton>
-            </span>
+                                            <span>
+                                                <IconButton
+                                                    onClick={() => handleNavigation(-1)}
+                                                    disabled={currentIndex === 0}
+                                                    size="small"
+                                                >
+                                                    <NavigateBeforeRounded />
+                                                </IconButton>
+                                            </span>
                                         </Tooltip>
                                         <Typography>{`${currentIndex + 1}/${documentos.length}`}</Typography>
                                         <Tooltip title="Siguiente">
-            <span>
-              <IconButton onClick={() => handleNavigation(1)} disabled={currentIndex === documentos.length - 1}
-                          size="small">
-                <NavigateNextRounded/>
-              </IconButton>
-            </span>
+                                            <span>
+                                                <IconButton
+                                                    onClick={() => handleNavigation(1)}
+                                                    disabled={currentIndex === documentos.length - 1}
+                                                    size="small"
+                                                >
+                                                    <NavigateNextRounded />
+                                                </IconButton>
+                                            </span>
                                         </Tooltip>
                                     </>
                                 )}
@@ -116,25 +117,26 @@ const DocumentViewer = ({documentos, config, setConfig}) => {
                                             download={nombre}
                                             size="small"
                                         >
-                                            <DownloadRounded fontSize="small"/>
+                                            <DownloadRounded fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
                                 )}
                                 <IconButton onClick={onClose}>
-                                    <Close/>
+                                    <Close />
                                 </IconButton>
                             </Box>
                         </Box>
                     </DialogTitle>
-                    {
-                        load && <div style={{padding: '2rem', textAlign: 'center'}}>
-                            <CircularProgress/>
+                    {load ? (
+                        <div style={{padding: '2rem', textAlign: 'center'}}>
+                            <CircularProgress />
                             <p>Cargando...</p>
                         </div>
-                    }
-                    {!load && <DialogContent style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                        {fileUrl ? (
-                            isImage ? (
+                    ) : (
+                        <DialogContent style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                            {!fileUrl ? (
+                                <Typography color="textSecondary">Cargando documento...</Typography>
+                            ) : isImage ? (
                                 <img
                                     src={fileUrl}
                                     alt={nombre}
@@ -145,27 +147,17 @@ const DocumentViewer = ({documentos, config, setConfig}) => {
                                         borderRadius: 4,
                                     }}
                                 />
-
-
                             ) : (
                                 <div style={{display: 'flex', justifyContent: 'center'}}>
-                                    {/* eslint-disable-next-line jsx-a11y/iframe-has-title */}
-                                    <iframe
-                                        src={`${fileUrl}#toolbar=1&amp;navpanes=0&amp;scrollbar=0`}
-                                        style={{
-                                            border: 'none',
-                                            width: '90%',
-                                            height: '70vh',
-                                        }}
-                                        allow="autoplay"
-                                    />
+                                    <div style={{height: '100%', border: '1px solid #ccc'}}>
+                                        <Suspense fallback={<div>Cargando visor PDF...</div>}>
+                                            <VisorPDFWrapper fileUrl={fileUrl} />
+                                        </Suspense>
+                                    </div>
                                 </div>
-                            )
-                        ) : (
-                            <Typography color="textSecondary">Cargando documento...</Typography>
-                        )}
-                    </DialogContent>
-                    }
+                            )}
+                        </DialogContent>
+                    )}
                 </>
             )}
         </Dialog>

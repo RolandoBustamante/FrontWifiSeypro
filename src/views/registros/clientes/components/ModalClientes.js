@@ -72,7 +72,7 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
         placeholder: "Calle | Avenida | Jr."
     })
     const [nro, inputNro, setNro, setInvalidNro] = useInput({
-        placeholder: 'N°', typeState: 'number'
+        placeholder: 'N°', typeState: 'text'
     })
     const [nacionalidad, selectNacionalidad, setNacionalidad, setInvalidNacionalidad, setOptionsNacionalidad] = useSelect({
         placeholder: 'Nacionalidad',
@@ -121,25 +121,6 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
 
     }, [cliente])
     useEffect(() => {
-        if (cliente.id) {
-            if (cliente.provincia) {
-                const optionsP = provincias[cliente.departamento].map(element => {
-                    return {value: element["id_ubigeo"], label: element["nombre_ubigeo"]}
-                })
-                setOptionsProvincia(optionsP)
-                setProvincia(cliente.provincia ?? '')
-            }
-            if (cliente.distrito) {
-                const options = distritos[cliente.provincia].map(element => {
-                    return {value: element["id_ubigeo"], label: element["nombre_ubigeo"]}
-                })
-                setOptionsDistrito(options)
-                setDistrito(cliente.distrito ?? '')
-
-            }
-        }
-    }, [cliente, provincia, distrito])
-    useEffect(() => {
         const invalidNombres = nombres === ''
         const invalidDni = dni === ''
         const invalidDepartamento = departamento === ''
@@ -161,39 +142,44 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
             || invalidNombres || invalidDepartamento || invalidProvincia || invalidDistrito || invalidDireccion || invalidNro)
     }, [nombres, dni, departamento, provincia, distrito, direccion, nro, nacionalidad, views])
     useEffect(() => {
-        if (!departamento || departamento === '') {
+        if (!departamento) {
             setOptionsProvincia([])
             setProvincia('')
             setDisabledProvincia(true)
             return
         }
-        setProvincia('')
-        setOptionsProvincia([])
-        setDistrito('')
-        setOptionsDistrito([])
+        const provOptions = provincias[departamento]?.map(el => ({
+            value: el.id_ubigeo,
+            label: el.nombre_ubigeo
+        })) ?? []
+        setOptionsProvincia(provOptions)
         setDisabledProvincia(false)
-        const options = provincias[departamento].map(element => {
-            return {value: element["id_ubigeo"], label: element["nombre_ubigeo"]}
-        })
-        setOptionsProvincia(options)
+
+        // solo si el cliente tiene provincia
+        if (cliente?.provincia) {
+            setProvincia(cliente.provincia)
+        }
     }, [departamento])
+
+// 4. Actualizar distritos cuando cambia la provincia
     useEffect(() => {
-        if (!provincia || provincia === '') {
+        if (!provincia) {
             setOptionsDistrito([])
             setDistrito('')
             setDisabledDistrito(true)
             return
         }
-        setDistrito('')
-        setOptionsDistrito([])
+        const distOptions = distritos[provincia]?.map(el => ({
+            value: el.id_ubigeo,
+            label: el.nombre_ubigeo
+        })) ?? []
+        setOptionsDistrito(distOptions)
         setDisabledDistrito(false)
-        const options = distritos[provincia].map(element => {
-            return {value: element["id_ubigeo"], label: element["nombre_ubigeo"]}
-        })
-        setOptionsDistrito(options)
-        if (cliente.distrito) setDistrito(cliente.distrito)
-    }, [provincia, cliente])
 
+        if (cliente?.distrito) {
+            setDistrito(cliente.distrito)
+        }
+    }, [provincia])
     const agregar = () => {
         const id = cadenaAleatoria(8);
         setViews((prevState) => [
