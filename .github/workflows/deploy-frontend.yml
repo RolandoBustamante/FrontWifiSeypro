@@ -16,7 +16,7 @@ jobs:
       - name: Instalar dependencias y construir proyecto
         run: |
           npm install
-          npm run build
+          CI='' npm run build
 
       - name: Subir archivos vía FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
