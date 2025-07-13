@@ -74,10 +74,31 @@ const RastreadorRouters = () => {
                                 header: 'Fecha Pago',
                                 accessor: 'nombres',
                                 Cell: (row)=>{
-                                    const {diaPago} = row
-                                    return <div>{moment(`${moment().format('YYYY-MM')}-${diaPago}`).format('YYYY-MM-DD')}</div>
+                                    const { diaPago } = row;
+                                    const base = moment(); // hoy
+                                    const finMes = base.clone().endOf('month').date();
+                                    const dia = diaPago > finMes ? finMes : diaPago;
+                                    return <div>{base.clone().date(dia).format('YYYY-MM-DD')}</div>;
                                 },
                                 align: 'center'
+                            },
+                            {
+                                header: 'Fecha Registro',
+                                accessor: 'codigo',
+                                align: "center",
+                                Cell: (row) => {
+                                    const {creado_en} = row
+                                    return (<div>{moment(creado_en??'').format('YYYY-MM-DD')}</div>)
+                                },
+                            },
+                            {
+                                header: 'Inicio Servicio',
+                                accessor: 'codigo',
+                                align: "center",
+                                Cell: (row) => {
+                                    const {fecha_inicio} = row
+                                    return (<div>{moment(fecha_inicio??'').format('YYYY-MM-DD')}</div>)
+                                },
                             },
                             {
                                 header: 'Cliente',

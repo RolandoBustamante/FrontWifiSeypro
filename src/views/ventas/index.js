@@ -378,13 +378,14 @@ export default function Facturador() {
             Toast.Error('Debes ingresar el número de operación ');
             return;
         }
-        const descripciones = detalle.map((d) => d.descripcion);
+
+        const jsonFinal = generarJsonComprobante();
+        const descripciones = jsonFinal.details.map((d) => d.descripcion);
         const repetidas = descripciones.filter((desc, idx, arr) => arr.indexOf(desc) !== idx);
         if (repetidas.length) {
             Toast.Error(`Hay periodos repetidos`);
             return
         }
-        const jsonFinal = generarJsonComprobante();
         Toast.Waiting('Emitiendo comprobante de pago')
         setIsLoading(true)
         const response =(await Ventas.emitirFactura({jsonFinal, doc, tipoPago, views, clienteRouter, nroOperacion}))

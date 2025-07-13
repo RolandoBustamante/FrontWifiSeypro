@@ -10,6 +10,8 @@ import DocumentViewer from "../../../components/DocumentosViewer";
 import useInput from "../../../customHooks/useInput";
 import {useAuthContext} from "../../../auth/useAuthContext";
 import useSelect from "../../../customHooks/useSelect";
+import Swal from "sweetalert2";
+import Toast from "../../../utils/toastUtil";
 
 
 const Rastreador = () => {
@@ -96,6 +98,11 @@ const Rastreador = () => {
         setDocumentos([{nombre, url}])
         setConfigView(true)
     }
+    const actualizarDeudaRouter= async (id, estado)=>{
+        Toast.Waiting('Actualizando...')
+        await Routers.actualizarDeuda({id, estado, tabla: 'routers'})
+        window.location.reload()
+    }
 
     return (
         <Container>
@@ -141,7 +148,7 @@ const Rastreador = () => {
                         {
                             header: ' ',
                             Cell: (row) => {
-                                const {id_file, imei} = row
+                                const {id_file, imei, estado, id} = row
                                 return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                                     {id_file && (
                                         <IconButton
@@ -162,6 +169,56 @@ const Rastreador = () => {
                                             />
                                         </IconButton>
                                     )}
+                                    {
+                                        estado && estado.toUpperCase()==='NODEVUELTO' && <IconButton
+                                            title="Ver detalle"
+                                            component="label"
+                                            onClick={async () => {
+                                                const opciones = {
+                                                    malogrado: 'Malogrado',
+                                                    devuelto: 'Devuelto'
+                                                };
+                                                const { value, isDismissed } = await Swal.fire({
+                                                    title: 'Estado actual del router',
+                                                    input: 'radio',
+                                                    inputOptions: opciones,
+                                                    showCancelButton: true,
+                                                    confirmButtonText: 'Aceptar',
+                                                    cancelButtonText: 'Cancelar',
+                                                    didOpen: () => {
+                                                        const radios = Swal.getPopup().querySelectorAll('input[type="radio"] + label');
+                                                        radios.forEach(label => {
+                                                            if (label.textContent.includes('Malogrado')) label.style.color = 'red';
+                                                            if (label.textContent.includes('Devuelto')) label.style.color = 'green';
+                                                        });
+                                                    },
+                                                    preConfirm: (value) => {
+                                                        if (!value) {
+                                                            return false; // No muestra error
+                                                        }
+                                                        return value;
+                                                    }
+                                                });
+
+                                                if (isDismissed || !value) {
+                                                    return;
+                                                }
+                                                // Lógica según la opción elegida
+                                                if (value === 'devuelto') {
+                                                    await actualizarDeudaRouter(id, 'DEVUELTO')
+                                                } else if (value === 'malogrado') {
+                                                    await actualizarDeudaRouter(id, 'MALOGRADO')
+                                                }
+                                            }}
+                                            style={{ padding: 0, margin: 0 }}
+                                        >
+                                            <Icon
+                                                icon="mdi:currency-usd-off"
+                                                style={{ fontSize: 18, color: 'inherit' }}
+                                            />
+                                        </IconButton>
+
+                                    }
                                 </div>
                             },
                             cellStyle: {minWidth: '3px'},

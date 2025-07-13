@@ -30,7 +30,6 @@ import DocumentViewer from "../../../components/DocumentosViewer";
 import Swal from 'sweetalert2';
 
 
-
 const Cliente = () => {
     const [data, setData] = useState([])
     const [config, setConfig] = useState({isOpen: false})
@@ -89,7 +88,7 @@ const Cliente = () => {
 
 
     useEffect(() => {
-        if(time>0) return
+        if (time > 0) return
         setLoading(true)
         Clientes.listaClientes(page, limit, buscar)
             .then(response => {
@@ -121,7 +120,6 @@ const Cliente = () => {
         if (routerEdit) {
             setOptionsSelectRouter([{value: routerEdit.id, label: `${routerEdit.marca}-${routerEdit.imei}`}])
             setRouterSelect(routerEdit.id)
-            setDisabledRouter(true)
         }
         const vendedorEdit = router?.ventas ? router.ventas[0].vendedor ?? null : null
 
@@ -159,6 +157,11 @@ const Cliente = () => {
         Ventas.updateFree(id, gratis).then(() => {
             setGratis(gratis)
         })
+    }
+    const actualizarDeudaRouter= async (id, estado)=>{
+        Toast.Waiting('Actualizando...')
+        await Routers.actualizarDeuda({id, estado, tabla: 'deuda'})
+        window.location.reload()
     }
     const rowCollapse = (row) => {
         setClienteCollapse(row)
@@ -223,6 +226,24 @@ const Cliente = () => {
                         Cell: (row) => {
                             const {codigo} = row.router
                             return (<div>{codigo ?? ''}</div>)
+                        },
+                    },
+                    {
+                        header: 'Fecha Registro',
+                        accessor: 'codigo',
+                        align: "center",
+                        Cell: (row) => {
+                            const {creado_en} = row
+                            return (<div>{moment(creado_en??'').format('YYYY-MM-DD')}</div>)
+                        },
+                    },
+                    {
+                        header: 'Inicio Servicio',
+                        accessor: 'codigo',
+                        align: "center",
+                        Cell: (row) => {
+                            const {fecha_inicio} = row
+                            return (<div>{moment(fecha_inicio??'').format('YYYY-MM-DD')}</div>)
                         },
                     },
                     {
@@ -354,31 +375,71 @@ const Cliente = () => {
                                         </IconButton>
                                     )}
                                     {
-                                        esDeudor&& (
+                                        esDeudor && (
                                             <IconButton
                                                 title="Ver detalle"
                                                 component="label"
-                                                onClick={() => {
-                                                    Swal.fire({
+                                                onClick={async () => {
+                                                    const deuda = deudas[0];
+                                                    const fechaDeuda = moment(deuda.fecha);
+                                                    const hoy = moment();
+                                                    const diferenciaMeses = hoy.diff(fechaDeuda, 'months');
+
+                                                    const opciones = {
+                                                        pagar: 'Pagar',
+                                                    };
+
+                                                    if (diferenciaMeses < 2) {
+                                                        opciones.devolver = 'Devolver';
+                                                    }
+
+                                                    const { value, isDismissed } = await Swal.fire({
                                                         title: 'Deuda pendiente',
-                                                        text:`${deudas[0].motivo}\n MONTO: ${deudas[0].monto}\n FECHA: ${moment(deudas[0].fecha).format('YYYY-MM-DD')}` ,
-                                                        icon: 'warning',
-                                                        confirmButtonText: 'Entendido'
+                                                        html: `
+                                                            <p>${deuda.motivo}</p>
+                                                            <p><strong>MONTO:</strong> ${deuda.monto}</p>
+                                                            <p><strong>FECHA:</strong> ${fechaDeuda.format('YYYY-MM-DD')}</p>
+                                                         `,
+                                                        input: 'radio',
+                                                        inputOptions: opciones,
+                                                        showCancelButton: true,
+                                                        confirmButtonText: 'Aceptar',
+                                                        cancelButtonText: 'Cancelar',
+                                                        didOpen: () => {
+                                                            const radios = Swal.getPopup().querySelectorAll('input[type="radio"] + label');
+                                                            radios.forEach(label => {
+                                                                if (label.textContent.includes('Pagar')) label.style.color = 'red';
+                                                                if (label.textContent.includes('Devolver')) label.style.color = 'green';
+                                                            });
+                                                        },
+                                                        preConfirm: (value) => {
+                                                            if (!value) {
+                                                                return false; // No muestra error
+                                                            }
+                                                            return value;
+                                                        }
                                                     });
+
+                                                    if (isDismissed || !value) {
+                                                        return;
+                                                    }
+
+                                                    console.log(`✅ Se presionó: ${value}`);
+                                                    // Lógica según la opción elegida
+                                                    if (value === 'pagar') {
+                                                        await actualizarDeudaRouter(deudas[0].id, 'PAGADO')
+                                                    } else if (value === 'devolver') {
+                                                        await actualizarDeudaRouter(deudas[0].id, 'DEVUELTO')
+                                                    }
                                                 }}
-                                                style={{
-                                                    padding: 0,
-                                                    margin: 0,
-                                                }}
+                                                style={{ padding: 0, margin: 0 }}
                                             >
                                                 <Icon
                                                     icon="mdi:currency-usd-off"
-                                                    style={{
-                                                        fontSize: 18,
-                                                        color: 'inherit'
-                                                    }}
+                                                    style={{ fontSize: 18, color: 'inherit' }}
                                                 />
                                             </IconButton>
+
                                         )
                                     }
                                 </div>
@@ -426,7 +487,7 @@ const Cliente = () => {
                         }, {
                             header: 'Departamento',
                             Cell: (row) => {
-                                const { departamento } = row;
+                                const {departamento} = row;
                                 const encontrado = departamentos.find(el => el.id_ubigeo === departamento);
                                 return <div>{encontrado ? encontrado.nombre_ubigeo : '-'}</div>;
                             },
@@ -435,7 +496,7 @@ const Cliente = () => {
                         {
                             header: 'Provincia',
                             Cell: (row) => {
-                                const { departamento, provincia } = row;
+                                const {departamento, provincia} = row;
                                 const listaProvincias = provincias[departamento] || [];
                                 const encontrado = listaProvincias.find(el => el.id_ubigeo === provincia);
                                 return <div>{encontrado ? encontrado.nombre_ubigeo : '-'}</div>;
@@ -445,7 +506,7 @@ const Cliente = () => {
                         {
                             header: 'Distrito',
                             Cell: (row) => {
-                                const { provincia, distrito } = row;
+                                const {provincia, distrito} = row;
                                 const listaDistritos = distritos[provincia] || [];
                                 const encontrado = listaDistritos.find(el => el.id_ubigeo === distrito);
                                 return <div>{encontrado ? encontrado.nombre_ubigeo : '-'}</div>;

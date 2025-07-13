@@ -72,5 +72,13 @@ const Routers={
         }`)
         return client.query({query, variables:{data}, fetchPolicy: 'no-cache'})
     },
+    actualizarDeuda: (data)=>{
+        const query=gql(`query actualizarDeuda($data: JSONObject!){
+            actualizarDeuda(data: $data){
+                success
+            }
+        }`)
+        return client.query({query, variables:{data}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Routers
