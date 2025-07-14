@@ -13,15 +13,19 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v3
 
-      - name: Instalar dependencias y construir proyecto
+      - name: Instalar dependencias y compilar
         run: |
           npm install
           CI=false npm run build
 
-      - name: Mostrar contenido del build
+      - name: Mostrar contenido generado
         run: ls -R build
 
-      - name: Subir archivos vía FTP
+      - name: Copiar configuración para excluir archivos
+        run: |
+          echo '{ "excluded": [".htaccess"] }' > build/.ftp-deploy-sync-settings.json
+
+      - name: Subir archivos vía FTP (forzar reemplazo sin borrar .htaccess)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -29,3 +33,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: build/
           server-dir: /
+          dangerous-clean-slate: true
