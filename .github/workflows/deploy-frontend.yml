@@ -18,14 +18,11 @@ jobs:
           npm install
           CI=false npm run build
 
-      - name: Mostrar contenido generado
-        run: ls -R build
-
-      - name: Copiar configuración para excluir archivos
+      - name: Agregar exclusión para .htaccess
         run: |
           echo '{ "excluded": [".htaccess"] }' > build/.ftp-deploy-sync-settings.json
 
-      - name: Subir archivos vía FTP (forzar reemplazo sin borrar .htaccess)
+      - name: Subir archivos vía FTP (limpiar y mantener .htaccess)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
