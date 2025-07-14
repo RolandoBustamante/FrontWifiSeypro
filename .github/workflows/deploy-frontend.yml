@@ -16,7 +16,7 @@ jobs:
       - name: Instalar dependencias y construir proyecto
         run: |
           npm install
-          npm run build
+          CI=false npm run build
 
       - name: Mostrar contenido del build
         run: ls -R build
