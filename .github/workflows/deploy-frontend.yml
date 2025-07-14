@@ -18,6 +18,9 @@ jobs:
           npm install
           CI='' npm run build
 
+      - name: Verificar contenido del build
+        run: ls -la build
+
       - name: Subir archivos vía FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -25,3 +28,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: build/
+          server-dir: public_html
