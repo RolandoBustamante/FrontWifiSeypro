@@ -58,95 +58,105 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
     const theme = useTheme();
     return (
         <TableContainer component={Paper}>
-            <Table>
-                <TableHead style={{backgroundColor: theme.palette.secondary.main, padding: 0, margin: 0}}>
-                    <TableRow style={{padding: 0, margin: 0}}>
-                        {columns.map((column, index) => (
-                            <TableCell
-                                style={{
-                                    textAlign: column.align ?? "start",
-                                    ...(column.headerStyle || {}),
-                                    border: `1px solid white`,
-                                    color: 'white',
-                                    padding: 0, margin: 0
-                                }}
-                                key={index}
-                            >
-                                {column.header ? column.header : ""}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {loading && (
-                        <TableRow>
-                            <TableCell colSpan={columns.length}>
-                                <Stack
-                                    direction="row"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    style={{height: '200px'}}
+            <div style={{
+                maxHeight: 'calc(90vh - 200px)',
+                maxWidth: 'calc(85vw - 200px)',
+                overflowY: 'auto',
+                overflowX: 'auto',
+                scrollbarWidth: 'thin',
+                scrollbarColor: `${theme.palette.primary.main} transparent`,
+            }} className="custom-scroll">
+                <Table>
+                    <TableHead style={{backgroundColor: theme.palette.secondary.main, padding: 0, margin: 0}}>
+                        <TableRow style={{padding: 0, margin: 0}}>
+                            {columns.map((column, index) => (
+                                <TableCell
+                                    style={{
+                                        textAlign: column.align ?? "start",
+                                        ...(column.headerStyle || {}),
+                                        border: `1px solid white`,
+                                        color: 'white',
+                                        padding: 0, margin: 0
+                                    }}
+                                    key={index}
                                 >
-                                    <CircularProgress/>
-                                </Stack>
-                            </TableCell>
+                                    {column.header ? column.header : ""}
+                                </TableCell>
+                            ))}
                         </TableRow>
-                    )}
-                    {!loading &&data&& data.map((row, rowIndex) => (
-                        <>
-                            <TableRow key={rowIndex} style={{
-                                padding: 0,
-                                margin: 0,
-                                backgroundColor: rowIndex % 2 === 0 ? '#f2f2f2' : 'white'
-                            }}>
-                                {columns.map((column, colIndex) => {
-                                    if (column.buttons) {
-                                        return (
-                                            <TableCell key={colIndex}
-                                                       style={{
-                                                           border: `1px solid black`,
-                                                           padding: 0, margin: 0, textAlign: column.align || 'start',
-                                                           ...(column.cellStyle || {})
-                                                       }}>
-                                                {column.buttons.map((button, buttonIndex) => (
-                                                    <IconButton title={button.tooltip ? button.tooltip : ""}
-                                                                style={{margin: 0, padding: 0}}
-                                                                key={buttonIndex} color={button.color ? button.color : ""}
-                                                                onClick={() => button.onClick(row)}>
-                                                        <Icon icon={button.icon}/>
-                                                    </IconButton>
-                                                ))}
-                                            </TableCell>
-                                        )
-                                    }
-                                    return <TableCell
-                                        key={colIndex}
-                                        style={{
-                                            textAlign: column.align || 'start',
-                                            border: `1px solid black`,
-                                            padding: 0,
-                                            margin: 0,
-                                            ...(column.cellStyle || {})
-                                        }} {...getCellProps(row, column)}>{renderCellContent(row, column)}</TableCell>;
-                                })}
+                    </TableHead>
+                    <TableBody>
+                        {loading && (
+                            <TableRow>
+                                <TableCell colSpan={columns.length}>
+                                    <Stack
+                                        direction="row"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        style={{height: '200px'}}
+                                    >
+                                        <CircularProgress/>
+                                    </Stack>
+                                </TableCell>
                             </TableRow>
-                            {
-                                row.open && <TableRow>
-                                    <TableCell colSpan={columns.length} style={{border: `1px solid black`}} >
-                                        <Collapse in={row.open}  sx={{ bgcolor: 'background.neutral' }}>
-                                            {row.collapseElement??<></>}
-                                        </Collapse>
-                                    </TableCell>
+                        )}
+                        {!loading &&data&& data.map((row, rowIndex) => (
+                            <>
+                                <TableRow key={rowIndex} style={{
+                                    padding: 0,
+                                    margin: 0,
+                                    backgroundColor: rowIndex % 2 === 0 ? '#f2f2f2' : 'white'
+                                }}>
+                                    {columns.map((column, colIndex) => {
+                                        if (column.buttons) {
+                                            return (
+                                                <TableCell key={colIndex}
+                                                           style={{
+                                                               border: `1px solid black`,
+                                                               padding: 0, margin: 0, textAlign: column.align || 'start',
+                                                               ...(column.cellStyle || {})
+                                                           }}>
+                                                    {column.buttons.map((button, buttonIndex) => (
+                                                        <IconButton title={button.tooltip ? button.tooltip : ""}
+                                                                    style={{margin: 0, padding: 0}}
+                                                                    key={buttonIndex} color={button.color ? button.color : ""}
+                                                                    onClick={() => button.onClick(row)}>
+                                                            <Icon icon={button.icon}/>
+                                                        </IconButton>
+                                                    ))}
+                                                </TableCell>
+                                            )
+                                        }
+                                        return <TableCell
+                                            key={colIndex}
+                                            style={{
+                                                textAlign: column.align || 'start',
+                                                border: `1px solid black`,
+                                                padding: 0,
+                                                margin: 0,
+                                                ...(column.cellStyle || {})
+                                            }} {...getCellProps(row, column)}>{renderCellContent(row, column)}</TableCell>;
+                                    })}
                                 </TableRow>
-                            }
-                        </>
+                                {
+                                    row.open && <TableRow>
+                                        <TableCell colSpan={columns.length} style={{border: `1px solid black`}} >
+                                            <Collapse in={row.open}  sx={{ bgcolor: 'background.neutral' }}>
+                                                {row.collapseElement??<></>}
+                                            </Collapse>
+                                        </TableCell>
+                                    </TableRow>
+                                }
+                            </>
 
-                    ))}
-                </TableBody>
-                <TableNoData
-                    isNotFound={!data.length && !loading}
-                />
-            </Table>
+                        ))}
+                    </TableBody>
+                    <TableNoData
+                        isNotFound={!data.length && !loading}
+                    />
+                </Table>
+            </div>
+
             {
                 pagination && (
                     <Stack direction="row" justifyContent="flex-end" alignItems="center" p={2} spacing={1}>

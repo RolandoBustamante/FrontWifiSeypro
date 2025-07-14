@@ -86,5 +86,15 @@ const Ventas = {
     `)
         return client.query({query, variables: {data}, fetchPolicy: 'no-cache'})
     },
+    litarMovimientos:(page, limit, param, estado, desde, hasta)=>{
+        const query = gql(`
+      query listarMovimientosMes ($page: Int,$limit: Int, $param: String, $estado: String, $desde: String, $hasta:String){
+       listarMovimientosMes (page: $page, limit: $limit, param: $param, estado: $estado, desde: $desde, hasta: $hasta){
+            data
+        }
+     }
+    `)
+        return client.query({query, variables: {page, limit, param, estado, desde, hasta}, fetchPolicy: 'no-cache'})
+    }
 }
 export default Ventas

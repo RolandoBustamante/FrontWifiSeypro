@@ -6,8 +6,8 @@ import {
     MenuItem,
     Paper,
     Select,
-    TextField,
-    Typography
+    Typography,
+    FormControlLabel, Switch
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import Toast from '../../utils/toastUtil';
@@ -26,7 +26,9 @@ const opcionesTipoDoc = [
 ];
 
 export default function ResumenCaja() {
-    const [tipoDoc, setTipoDoc] = useState('');
+    const [tipoDoc, selectTipoDoc,setTipoDoc] = useSelect({
+        placeholder: 'Comrpobante', optionsState: opcionesTipoDoc
+    });
     const [desde, inputDesde] = useInput({
         typeState: 'date',
         initialState: moment().startOf('isoWeek').format('YYYY-MM-DD'), // lunes
@@ -48,12 +50,14 @@ export default function ResumenCaja() {
 
     const [resumen, setResumen] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [mostrarTotales, setMostrarTotales] = useState(false);
+
 
     useEffect(() => {
         setOptionSedes([])
         Usuario.allSedes().then(response => {
             const {allSedes} = response.data
-            const options = []
+            const options = [{label: 'Todas', value: ''}]
             for (const element of allSedes) {
                 options.push({value: element.id, label: element.nombre})
             }
@@ -69,7 +73,7 @@ export default function ResumenCaja() {
     }, [])
     useEffect(() => {
         if (ventasTipo) {
-            const elementos = []
+            const elementos = [{label: 'Todos', value: ''}]
             for (const element of ventasTipo) {
                 elementos.push({label: element.nombre, value: element.id})
             }
@@ -82,7 +86,7 @@ export default function ResumenCaja() {
             Toast.Warning('Debes seleccionar ambas fechas');
             return;
         }
-
+        setMostrarTotales(false)
         setLoading(true);
         try {
             const response = await Ventas.getResumenCaja({
@@ -124,18 +128,7 @@ export default function ResumenCaja() {
                     {selectSede}
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Select
-                        fullWidth
-                        value={tipoDoc}
-                        onChange={e => setTipoDoc(e.target.value)}
-                        displayEmpty
-                    >
-                        {opcionesTipoDoc.map(option => (
-                            <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
+                    {selectTipoDoc}
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <Button
@@ -148,13 +141,48 @@ export default function ResumenCaja() {
                         {loading ? <CircularProgress size={20} /> : 'Consultar'}
                     </Button>
                 </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    {(resumen?.anulado?.cantidad > 0 || resumen?.anulado?.total > 0) && (
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={mostrarTotales}
+                                    onChange={() => setMostrarTotales(prev => !prev)}
+                                />
+                            }
+                            label="Mostrar Totales (Incluye Anulados)"
+                            sx={{ mt: 1 }}
+                        />
+                    )}
+                </Grid>
             </Grid>
 
             {resumen && (
                 <Paper elevation={1} sx={{ p: 2, mt: 3, backgroundColor: '#f5f5f5' }}>
-                    <Typography variant="subtitle1"><strong>Resumen</strong></Typography>
-                    <Typography variant="body2">Total: S/ {resumen.total.toFixed(2)}</Typography>
-                    <Typography variant="body2">Comprobantes Emitidos: {resumen.cantidad}</Typography>
+                    <Typography variant="subtitle1"><strong>Resumen de Caja</strong></Typography>
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="body2"><strong>Activos</strong></Typography>
+                            <Typography variant="body2">Total: S/ {resumen.activo.total.toFixed(2)}</Typography>
+                            <Typography variant="body2">Comprobantes: {resumen.activo.cantidad}</Typography>
+                        </Grid>
+
+                        {(resumen?.anulado?.cantidad > 0 || resumen?.anulado?.total > 0) && (
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="body2"><strong>Anulados</strong></Typography>
+                                <Typography variant="body2">Total: S/ {resumen.anulado.total.toFixed(2)}</Typography>
+                                <Typography variant="body2">Comprobantes: {resumen.anulado.cantidad}</Typography>
+                            </Grid>
+                        )}
+
+                        {mostrarTotales && (
+                            <Grid item xs={12}>
+                                <Typography variant="body2"><strong>Totales Generales</strong></Typography>
+                                <Typography variant="body2">Total: S/ {resumen.total.total.toFixed(2)}</Typography>
+                                <Typography variant="body2">Comprobantes: {resumen.total.cantidad}</Typography>
+                            </Grid>
+                        )}
+                    </Grid>
                 </Paper>
             )}
         </Paper>

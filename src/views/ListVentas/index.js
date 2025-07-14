@@ -169,6 +169,7 @@ const ListVentas = () => {
                                                         } else {
                                                             Toast.Error('Error al emitir la nota');
                                                         }
+                                                        window.location.reload()
                                                     } catch (e) {
                                                         Toast.Remove();
                                                         Toast.Error(e.message);
