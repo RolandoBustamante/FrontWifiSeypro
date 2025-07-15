@@ -1,4 +1,4 @@
-name: Deploy React App to Hostinger via FTP
+name: Deploy to FTP
 
 on:
   push:
@@ -6,22 +6,41 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
+    name: Build and Deploy via FTP
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Instalar dependencias y construir proyecto
-        run: |
-          npm install
-          CI='' npm run build
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-      - name: Subir archivos vía FTP
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: CI=false npm run build
+
+      - name: Verificar carpeta build
+        run: |
+          echo "Directorio actual:"
+          pwd
+          echo "Contenido del directorio actual:"
+          ls -al
+          echo "Contenido de la carpeta build:"
+          ls -al build || echo "La carpeta build no existe"
+
+      - name: Upload to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: build/
+          port: 21
+          protocol: ftp
+          local-dir: ./build/
+          server-dir: public_html/
