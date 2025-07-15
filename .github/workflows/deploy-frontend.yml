@@ -23,7 +23,7 @@ jobs:
         run: npm install
 
       - name: Build frontend
-        run: npm run build  # Esto ahora también genera la carpeta 'out'
+        run: CI=false npm run build  # Esto ahora también genera la carpeta 'out'
 
       - name: Upload to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
