@@ -24,7 +24,7 @@ jobs:
       - name: Build del frontend
         run: CI=false npm run build
 
-      - name: Subir al dominio real (sin borrar .htaccess)
+      - name: Subir al dominio real (sin eliminar .htaccess)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -38,13 +38,3 @@ jobs:
           dangerous-clean-slate: true
           exclude: |
             .htaccess
-
-      - name: Eliminar .ftp-deploy-sync-state.json
-        run: |
-          sudo apt-get update && sudo apt-get install -y lftp
-          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "
-            set ftp:list-options -a;
-            cd /domains/m2m.seypro.net.pe/public_html/;
-            rm .ftp-deploy-sync-state.json;
-            bye
-          " -p 21 ftp://${{ secrets.FTP_SERVER }}
