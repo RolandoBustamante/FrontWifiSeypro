@@ -16,7 +16,7 @@ jobs:
           echo "Esto es una prueba de subida FTP" > temp/prueba.txt
           ls -al temp
 
-      - name: Subir archivo a raíz del FTP (que ya es public_html)
+      - name: Subir archivo a public_html del dominio correcto
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -25,6 +25,5 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./temp/
-          server-dir: /
+          server-dir: domains/m2m.seypro.net.pe/public_html/
           strip-components: 1
-
