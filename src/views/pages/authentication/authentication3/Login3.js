@@ -33,10 +33,10 @@ const Login = () => {
         formState: {errors},
     } = methods;
     const [cuenta, inputCuenta, , setInvalidCuenta, setMessageCuenta] = useInput({
-        typeState: "text", placeholder: "Correo o cuenta", valid: true
+        typeState: "text", placeholder: "Correo o cuentassssssss", valid: true
     })
     const [contrasena, inputContrasena, , setInvalidContrasena, setMessageContrasena] = useInputPass({
-        typeState: "password", placeholder: "Contraseña", valid: true
+        typeState: "password", placeholder: "Contraseñasssss", valid: true
     })
     const [disabled, setDisabled] = useState(false)
     const onSubmit = async () => {
