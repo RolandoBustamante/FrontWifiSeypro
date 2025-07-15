@@ -16,7 +16,7 @@ jobs:
           echo "Esto es una prueba de subida FTP" > temp/prueba.txt
           ls -al temp
 
-      - name: Subir por FTP a Hostinger
+      - name: Subir archivo a raíz del FTP (que ya es public_html)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -25,4 +25,5 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./temp/
-          server-dir: public_html/
+          server-dir: /
+          strip-components: 1
