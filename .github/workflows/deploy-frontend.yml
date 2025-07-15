@@ -25,11 +25,13 @@ jobs:
       - name: Build frontend
         run: CI=false npm run build
 
-      - name: Verificar carpeta build
+      - name: Crear archivo de validación
+        run: echo "Deploy OK - ubicación FTP confirmada" > build/ubicacion-check.txt
+
+      - name: Verificar archivos generados
         run: |
-          echo "Directorio actual:"
-          pwd
           echo "Contenido del directorio actual:"
+          pwd
           ls -al
           echo "Contenido de la carpeta build:"
           ls -al build || echo "La carpeta build no existe"
@@ -44,3 +46,6 @@ jobs:
           protocol: ftp
           local-dir: ./build/
           server-dir: public_html/
+
+      - name: Eliminar archivo de validación (opcional)
+        run: rm build/ubicacion-check.txt || echo "Archivo no encontrado"
