@@ -1,17 +1,16 @@
-name: Deploy to FTP
+name: Build and Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Build and Deploy via FTP
+  build:
+    name: Build ⛏
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node
@@ -20,21 +19,27 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build frontend
+      - name: Build project
         run: CI=false npm run build
 
-      - name: Crear archivo de validación
-        run: echo "Deploy OK - ubicación FTP confirmada" > build/ubicacion-check.txt
+      - name: Archive production artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build
 
-      - name: Verificar archivos generados
-        run: |
-          echo "Contenido del directorio actual:"
-          pwd
-          ls -al
-          echo "Contenido de la carpeta build:"
-          ls -al build || echo "La carpeta build no existe"
+  deploy:
+    name: Deploy 🚀
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: build
 
       - name: Upload to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -46,6 +51,5 @@ jobs:
           protocol: ftp
           local-dir: ./build/
           server-dir: public_html/
-
-      - name: Eliminar archivo de validación (opcional)
-        run: rm build/ubicacion-check.txt || echo "Archivo no encontrado"
+          strip-components: 1
+          dangerous-clean-slate: true
