@@ -23,7 +23,16 @@ jobs:
         run: npm install
 
       - name: Build frontend
-        run: CI=false npm run build  # Esto ahora también genera la carpeta 'out'
+        run: CI=false npm run build
+
+      - name: Verificar carpeta build
+        run: |
+          echo "Directorio actual:"
+          pwd
+          echo "Contenido del directorio actual:"
+          ls -al
+          echo "Contenido de la carpeta build:"
+          ls -al build || echo "La carpeta build no existe"
 
       - name: Upload to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -33,4 +42,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftp
-          local-dir: ./out/
+          local-dir: ./build/
