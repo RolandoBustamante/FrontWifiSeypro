@@ -113,7 +113,7 @@ const Login = () => {
                                                         variant="contained"
                                                         color="secondary"
                                                     >
-                                                        Iniciar Sesiónesssssss
+                                                        Iniciar Sesión
                                                     </LoadingButton>
                                                 </AnimateButton>
                                             </Box>
