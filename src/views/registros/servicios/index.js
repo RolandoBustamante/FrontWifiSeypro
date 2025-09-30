@@ -1,5 +1,5 @@
 import {Button, Card, CardContent, Container, FormControl, FormControlLabel, Stack} from "@mui/material";
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import useAsyncSelect from "../../../customHooks/useAsyncSelect";
 import Routers from "../../../Models/Routers";
 import useInput from "../../../customHooks/useInput";
@@ -33,6 +33,7 @@ const Servicios= ()=>{
         labelPlace:'Repartidor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
     })
     const [emitir, switchEmitir,setSwitch] = useSwitch({initialState: false})
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(()=>{
         if(routerSelect && esUUID(routerSelect)){
@@ -45,6 +46,8 @@ const Servicios= ()=>{
         }
     },[routerSelect])
     const guardarRouterCliente= async ()=>{
+        if (isSaving) return
+        setIsSaving(true)
         Toast.Waiting('Guardando...')
         let data={cliente_id: clienteSelect, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario, emitir, monto}
         try {
@@ -52,9 +55,12 @@ const Servicios= ()=>{
             Toast.Remove()
             Toast.Success('Guardado exitoso')
             window.location.reload()
+            setIsSaving(false)
+
         }catch (e) {
             Toast.Remove()
             Toast.Error(e.message)
+            setIsSaving(false)
 
         }
     }
@@ -103,6 +109,7 @@ const Servicios= ()=>{
                         <LoadingButton
                             variant="contained"
                             color="success"
+                            disabled={isSaving}
                             onClick={guardarRouterCliente}
                         >
                             Guardar
@@ -110,6 +117,7 @@ const Servicios= ()=>{
                         <Button
                             variant="contained"
                             color="error"
+                            disabled={isSaving}
                             onClick={() => {
                                 setUsuario('')
                                 setCodigoPago('')
