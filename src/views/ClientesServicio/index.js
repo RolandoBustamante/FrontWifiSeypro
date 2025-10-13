@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from "react";
 import ReactTablePagination from "../../utilsComponents/CustomTable";
-import { Box, Card, CardContent, Container } from "@mui/material";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Container,
+    Dialog,
+    DialogActions, DialogContent,
+    DialogTitle,
+    IconButton,
+    Stack
+} from "@mui/material";
 import Clientes from "../../Models/Clientes";
 import useInput from "../../customHooks/useInput";
 import moment from "moment";
 import ModalAnular from "../ModalAnular/ModalAnular";
+import {Icon} from "@iconify/react";
+import {LoadingButton} from "@mui/lab";
+import Routers from "../../Models/Routers";
 
 const RastreadorRouters = () => {
     const [data, setData] = useState([]);
@@ -19,6 +33,11 @@ const RastreadorRouters = () => {
     const [id, setId]= useState(null)
     const [sede, setSede]= useState(null)
     const [time, setTime]= useState(0)
+    const [configEditar, setConfigEditar] = useState({isOpen: false})
+    const [direccion_servicio, inputdireccion_servicio,setdireccion_servicio ] = useInput({
+            initialState: '', placeholder: 'Direccion del Servicio'
+        }
+    )
     useEffect(()=>{
         setTime(2)
     },[param])
@@ -41,6 +60,25 @@ const RastreadorRouters = () => {
         setId(row.value)
         setSede(row.sede_id)
         setConfig({...config, isOpen: true})
+    }
+    const onClickEditarDireccion= (row)=>{
+        setdireccion_servicio(row.direccion_servicio??'')
+        setId(row.value)
+        setConfigEditar({isOpen: true})
+    }
+    const save= ()=>{
+        Routers.editarDireccionClienteRouter({id, direccion_servicio})
+            .then(()=>{
+                setData(prev =>
+                    prev.map(element =>
+                        element.value === id
+                            ? { ...element, direccion_servicio }
+                            : element
+                    )
+                );
+                setConfigEditar({...config, isOpen: false})
+
+            })
     }
 
     return (
@@ -80,7 +118,8 @@ const RastreadorRouters = () => {
                                     const dia = diaPago > finMes ? finMes : diaPago;
                                     return <div>{base.clone().date(dia).format('YYYY-MM-DD')}</div>;
                                 },
-                                align: 'center'
+                                align: 'center',
+                                cellStyle: {minWidth: '70px'},
                             },
                             {
                                 header: 'Fecha Registro',
@@ -120,11 +159,58 @@ const RastreadorRouters = () => {
                                 accessor: 'sim_card',
                                 align: 'center'
                             },
+                            {
+                                header: 'Dirección Servicio',
+                                accessor: 'direccion_servicio',
+                                align: "center",
+                                cellStyle: {minWidth: '100px'},
+                                Cell: (row) => {
+                                    const {direccion_servicio} = row
+                                    return (<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <span>{direccion_servicio ?? ''}</span>
+                                        <IconButton
+                                            title="Editar"
+                                            color="warning"
+                                            style={{ margin: 0, padding: 0 }}
+                                            onClick={() => onClickEditarDireccion(row)}
+                                        >
+                                            <Icon icon="mdi:pencil" />
+                                        </IconButton>
+                                    </div>)
+                                },
+                            }
                         ]}
                     />
                 </CardContent>
             </Card>
             <ModalAnular config={config} setConfig={setConfig} id={id} sede_id={sede}/>
+            <Dialog open={configEditar.isOpen} fullWidth>
+                <DialogTitle>Dirección del servicio</DialogTitle>
+                <br/>
+                <DialogContent>
+                    <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
+                        {inputdireccion_servicio}
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <LoadingButton
+                        variant="contained"
+                        color="success"
+                        onClick={() => save()}
+                    >
+                        Guardar
+                    </LoadingButton>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                            setConfigEditar({...config, isOpen: false})
+                        }}
+                    >
+                        Cancelar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

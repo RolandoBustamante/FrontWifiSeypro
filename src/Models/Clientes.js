@@ -83,5 +83,15 @@ const Clientes={
         `)
         return client.query({query, variables: {page, limit, param}, fetchPolicy: 'no-cache'})
     },
+    obtenerDireccion: (id)=>{
+        const query= gql(`
+        query extraerDireccion($id: String!){
+            extraerDireccion(id: $id){
+            data
+           }
+        }
+        `)
+        return client.query({query,variables:{id}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Clientes

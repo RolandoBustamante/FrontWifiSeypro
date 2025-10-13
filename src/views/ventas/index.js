@@ -196,8 +196,8 @@ export default function Facturador() {
         Clientes.infoFacturacion(clienteRouter).then(response => {
             const {obtenerInfo} = response.data
             if (obtenerInfo.data) {
-                const {cliente, movimientos} = obtenerInfo.data
-                setInfoCliente(cliente)
+                const {cliente, movimientos, direccion_servicio} = obtenerInfo.data
+                setInfoCliente({...cliente, direccion_servicio})
                 for (const mov of movimientos) {
                     setViews((prevState) => [
                         ...prevState,
@@ -289,7 +289,7 @@ export default function Facturador() {
                 numDoc: infoCliente.documento_identidad,
                 rznSocial: infoCliente.nombres,
                 address: {
-                    direccion: infoCliente.direccion ?? "-",
+                    direccion:infoCliente.direccion_servicio?? infoCliente.direccion ?? "-",
                     provincia: detallesDireccion.provincia ?? "-",
                     departamento: detallesDireccion.departamento ?? "-",
                     distrito: detallesDireccion.distrito ?? "-",
@@ -376,6 +376,14 @@ export default function Facturador() {
         }
         if (bancarizado && (nroOperacion === '' || !nroOperacion)) {
             Toast.Error('Debes ingresar el número de operación ');
+            return;
+        }
+        if(views && views.length===0){
+            Toast.Error('Debes ingresar al menos un mes de pago ');
+            return;
+        }
+        if(views && views.length>0 && views.some(element=> element.invalid)){
+            Toast.Error('Debes ingresar todos los datos del servicio ');
             return;
         }
 

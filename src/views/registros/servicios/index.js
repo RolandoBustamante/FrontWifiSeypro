@@ -32,9 +32,19 @@ const Servicios= ()=>{
     const [usuario, selectUsuario, setUsuario, ]= useAsyncSelect({
         labelPlace:'Repartidor', modelo: {Model:Vendedores, respuesta: 'vendedoresParam'},
     })
+    const [direccion, inputDireccion, setDireccion]= useInput({
+        placeholder: 'Dirección servicio'
+    })
     const [emitir, switchEmitir,setSwitch] = useSwitch({initialState: false})
     const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(()=>{
+        if(!clienteSelect)return
+        Clientes.obtenerDireccion(clienteSelect).then(response=>{
+            const {extraerDireccion}= response.data
+            setDireccion(extraerDireccion?.data?.direccion??'')
+        })
+    },[clienteSelect])
     useEffect(()=>{
         if(routerSelect && esUUID(routerSelect)){
             Routers.getById(routerSelect, 'codigo, precio_servicio')
@@ -49,7 +59,7 @@ const Servicios= ()=>{
         if (isSaving) return
         setIsSaving(true)
         Toast.Waiting('Guardando...')
-        let data={cliente_id: clienteSelect, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario, emitir, monto}
+        let data={cliente_id: clienteSelect, router_id: routerSelect, fecha_inicio:fechaInicio , vendedor: usuario, emitir, monto, direccion_servicio: direccion}
         try {
             await Ventas.createOrUpdateRouters(data)
             Toast.Remove()
@@ -89,6 +99,9 @@ const Servicios= ()=>{
                         </FormControl>
                         <FormControl style={{flex: 1}}>
                             {inputFechaInicio}
+                        </FormControl>
+                        <FormControl style={{flex: 1}}>
+                            {inputDireccion}
                         </FormControl>
                         <FormControl style={{flex: 1}}>
                             <FormControlLabel

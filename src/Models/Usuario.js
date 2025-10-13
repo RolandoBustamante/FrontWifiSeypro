@@ -133,5 +133,13 @@ const Usuario = {
     `)
         return client.query({ query, fetchPolicy: 'no-cache' })
     },
+    createOrUpdateSede: (data, recursos)=>{
+        const mutation=gql(`mutation createOrUpdateSede($data: JSONObject!){
+            createOrUpdateSede(data: $data){
+                ${recursos}
+            }
+        }`)
+        return client.mutate({mutation, variables:{data}, fetchPolicy: 'no-cache'})
+    },
 };
 export default Usuario;

@@ -7,6 +7,7 @@ import AdminGuard from "../auth/AdminGuard";
 
 const AdminPage= Loadable(lazy(()=>import('views/admin')))
 const VendedorPage= Loadable(lazy(()=>import('views/registros/Vendedores')))
+const SedesPage= Loadable(lazy(()=>import('views/Sedes')))
 const WhatsappPage= Loadable(lazy(()=>import('views/whatsapp')))
 const RolesAdminPage= Loadable(lazy(()=>import('views/rolesPermisos')))
 const NumerosAviso= Loadable(lazy(()=>import('views/Avisos')))
@@ -18,6 +19,10 @@ const AdminRoute={
         {
             path: 'roles',
             element: <RolesAdminPage/>
+        },
+        {
+            path: 'sedes',
+            element: <SedesPage/>
         },
         {
             path: 'user',

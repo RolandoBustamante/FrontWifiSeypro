@@ -80,5 +80,13 @@ const Routers={
         }`)
         return client.query({query, variables:{data}, fetchPolicy: 'no-cache'})
     },
+    editarDireccionClienteRouter: (data)=>{
+        const query=gql(`query editarDireccionClienteRouter($data: JSONObject!){
+            editarDireccionClienteRouter(data: $data){
+                success
+            }
+        }`)
+        return client.query({query, variables:{data}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Routers

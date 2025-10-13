@@ -1,4 +1,4 @@
-import {IconUser, IconUserSearch, IconBrandWhatsapp,IconUserCircle, IconUserMinus} from '@tabler/icons'
+import {IconUser, IconUserSearch, IconBrandWhatsapp,IconUserCircle, IconUserMinus, IconBuildingWarehouse} from '@tabler/icons'
 const admin={
     id: 'admin',
     title: 'Administrador',
@@ -10,6 +10,14 @@ const admin={
             type: 'item',
             url: '/admin/user',
             icon: IconUser,
+            breadcrumbs: false
+        },
+        {
+            id:'admin-sedes',
+            title: 'Sedes',
+            type: 'item',
+            url: '/admin/sedes',
+            icon: IconBuildingWarehouse,
             breadcrumbs: false
         },
         {
