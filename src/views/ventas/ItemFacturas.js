@@ -75,10 +75,10 @@ const ItemFacturas = ({item, setViews, views, setDetalle, detalle}) => {
             <TableCell style={{padding:0, margin:0}}>{inputIgv}</TableCell>
             <TableCell style={{padding:0, margin:0}}>{inputMonto}</TableCell>
             <TableCell className="align-top" align="center" style={{margin: 0, padding: 0}}>
-                {!(esUUID(item.id)) && <IconButton title="eliminar" color="error"
+                <IconButton title="eliminar" color="error"
                                                                 onClick={() => eliminar()}>
                     <Icon icon='mdi:delete'/>
-                </IconButton>}
+                </IconButton>
             </TableCell>
         </TableRow>
     )
