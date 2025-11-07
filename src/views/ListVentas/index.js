@@ -38,6 +38,7 @@ const ListVentas = () => {
     }, [time])
     useEffect(() => {
         setTime(2)
+        setPage(0)
     }, [buscar])
 
     const handleIconClick=(row)=>{
@@ -179,6 +180,33 @@ const ListVentas = () => {
                                                 <Icon icon="mdi:file-cancel-outline" color="orange" width={24} height={24} />
                                             </IconButton>
                                         </Tooltip>}
+                                        {row.estadoSunat === 'RECHAZADO' && (
+                                            <Tooltip title="Reenviar a SUNAT">
+                                                <IconButton
+                                                    onClick={async () => {
+                                                        Toast.Waiting('Reenviando a SUNAT...');
+                                                        try {
+                                                            const res = await Ventas.reenviarFacturaBoleta(row.id);
+                                                            const { reenviarOperacion } = res.data;
+
+                                                            Toast.Remove();
+                                                            if (reenviarOperacion.success) {
+                                                                Toast.Success('Comprobante reenviado correctamente');
+                                                            } else {
+                                                                Toast.Error('Error al reenviar el comprobante');
+                                                            }
+
+                                                            window.location.reload();
+                                                        } catch (e) {
+                                                            Toast.Remove();
+                                                            Toast.Error(e?.graphQLErrors?.[0]?.message || e.message);
+                                                        }
+                                                    }}
+                                                >
+                                                    <Icon icon="mdi:reload" color="#1976d2" width={24} height={24} />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
                                     </div>
                                    )
                             },

@@ -396,17 +396,31 @@ export default function Facturador() {
         }
         Toast.Waiting('Emitiendo comprobante de pago')
         setIsLoading(true)
-        const response =(await Ventas.emitirFactura({jsonFinal, doc, tipoPago, views, clienteRouter, nroOperacion}))
-        const res= response?.data?.emitirFactura??{}
-        if (res?.data?.success && res?.data?.pdfUrl) {
-            setPdfUrl(res.data.pdfUrl);
-            setDialogOpen(true);
+        try {
+            const response =(await Ventas.emitirFactura({jsonFinal, doc, tipoPago, views, clienteRouter, nroOperacion}))
+            const res= response?.data?.emitirFactura??{}
+            if (res?.data?.success && res?.data?.pdfUrl) {
+                setPdfUrl(res.data.pdfUrl);
+                setDialogOpen(true);
+                Toast.Remove()
+                Toast.Success('Comprobante emitido correctamente');
+                setIsLoading(false)
+            } else {
+                Toast.Remove()
+                Toast.Error('Error al emitir comprobante');
+                setIsLoading(false)
+            }
+        }catch (e) {
             Toast.Remove()
-            Toast.Success('Comprobante emitido correctamente');
+            const msg =
+                e?.graphQLErrors?.[0]?.message ||
+                e?.message ||
+                "Ocurrió un error inesperado";
+            Toast.Remove()
+            Toast.Error(msg);
             setIsLoading(false)
-        } else {
-            Toast.Error('Error al emitir comprobante');
         }
+
     };
 
     return (

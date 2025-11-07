@@ -31,6 +31,20 @@ const Ventas = {
     `)
         return client.query({query, variables: {json}, fetchPolicy: 'no-cache'})
     },
+    reenviarFacturaBoleta: (operacionId) => {
+        const query = gql(`
+      query reenviarFacturaBoleta($operacionId: String!){
+        reenviarFacturaBoleta(operacionId: $operacionId){
+          data
+        }
+      }
+    `);
+        return client.query({
+            query,
+            variables: { operacionId },
+            fetchPolicy: "no-cache",
+        });
+    },
     enviarComprobante: (url, numero) => {
         const query = gql(`
       query enviarComprobante($url: String!, $numero: String!){
