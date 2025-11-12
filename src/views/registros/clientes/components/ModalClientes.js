@@ -203,6 +203,7 @@ const ModalClientes = ({config, cliente, setConfig, setData}) => {
                 return {id: element.id, tipo: element.tipo, numero: element.numero}
             }), doc2, doc1
         }
+        console.log(object)
         if (cliente.id) object = {...object, id: cliente.id}
         try {
             const {data} = await Clientes.createOrUpdate(object, 'id, estado,correo,documento_identidad, direccion, observacion,numero_direccion,nombres, provincia, dni_back,dni_front,departamento, distrito, nacionalidad,celulares{id, tipo, numero}')
