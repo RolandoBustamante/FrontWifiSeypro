@@ -235,6 +235,18 @@ const Rastreador = () => {
                             align: "center",
                         },
                         {
+                            header: 'NRO. SIM-CARD',
+                            accessor: 'imei',
+                            align: "center",
+                            Cell: (row) => {
+                                const { chips } = row;
+                                const chipUsado = chips?.find(element => element.usado);
+                                const simCard = chipUsado?.sim_card ?? "";
+
+                                return <div>{simCard}</div>;
+                            },
+                        },
+                        {
                             header: 'Marca',
                             accessor: 'marca',
                             align: "center",

@@ -173,12 +173,27 @@ const Sim = () => {
                             header: 'ESTADO',
                             accessor: 'estado',
                             Cell: (row) => {
-                                const {usado} = row
+                                const {usado, bloqueado} = row
                                 return (<Box>
-                                    <Label variant="soft" color={usado ? 'primary' : 'success'}
-                                           sx={{textTransform: 'capitalize'}}>
-                                        {usado ? 'USADO' : 'LIBRE'}
-                                    </Label>
+                                    {!bloqueado ? (
+                                        <Box>
+                                            <Label
+                                                variant="soft"
+                                                color={usado ? "primary" : "success"}
+                                                sx={{ textTransform: "capitalize" }}
+                                            >
+                                                {usado ? "USADO" : "LIBRE"}
+                                            </Label>
+                                        </Box>
+                                    ) : (
+                                        <Label
+                                            variant="soft"
+                                            color="error"
+                                            sx={{ textTransform: "capitalize" }}
+                                        >
+                                            Bloqueado
+                                        </Label>
+                                    )}
                                 </Box>)
                             },
                             align: "center",
