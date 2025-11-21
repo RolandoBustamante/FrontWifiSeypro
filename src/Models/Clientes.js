@@ -93,5 +93,46 @@ const Clientes={
         `)
         return client.query({query,variables:{id}, fetchPolicy: 'no-cache'})
     },
+    enviarReciboPorPeriodo: ({
+                                 cliente_router_id,
+                                 periodo,
+                                 enviarWhatsapp,
+                                 enviarCorreo,
+                                 numero,
+                                 correo
+                             }) => {
+        const query = gql(`
+        query enviarRecibosPorPeriodo(
+            $cliente_router_id: String!,
+            $periodo: String!,
+            $enviarWhatsapp: Boolean,
+            $enviarCorreo: Boolean,
+            $numero: String,
+            $correo: String
+        ){
+            enviarRecibosPorPeriodo(
+                cliente_router_id: $cliente_router_id,
+                periodo: $periodo,
+                enviarWhatsapp: $enviarWhatsapp,
+                enviarCorreo: $enviarCorreo,
+                numero: $numero,
+                correo: $correo
+            )
+        }
+    `);
+
+        return client.query({
+            query,
+            variables: {
+                cliente_router_id,
+                periodo,
+                enviarWhatsapp,
+                enviarCorreo,
+                numero,
+                correo
+            },
+            fetchPolicy: 'no-cache'
+        });
+    },
 }
 export default Clientes

@@ -19,6 +19,7 @@ import ModalAnular from "../ModalAnular/ModalAnular";
 import {Icon} from "@iconify/react";
 import {LoadingButton} from "@mui/lab";
 import Routers from "../../Models/Routers";
+import ModalEnvioReciboPago from "./ModalEnvioReciboPago";
 
 const RastreadorRouters = () => {
     const [data, setData] = useState([]);
@@ -34,10 +35,12 @@ const RastreadorRouters = () => {
     const [sede, setSede]= useState(null)
     const [time, setTime]= useState(0)
     const [configEditar, setConfigEditar] = useState({isOpen: false})
+    const [configRecibo, setConfigRecibo] = useState({isOpen: false})
     const [direccion_servicio, inputdireccion_servicio,setdireccion_servicio ] = useInput({
             initialState: '', placeholder: 'Direccion del Servicio'
         }
     )
+    const [cliente, setCliente]= useState({})
     useEffect(()=>{
         setTime(2)
     },[param])
@@ -60,6 +63,10 @@ const RastreadorRouters = () => {
         setId(row.value)
         setSede(row.sede_id)
         setConfig({...config, isOpen: true})
+    }
+    const send=(row)=>{
+        setCliente(row)
+        setConfigRecibo({...configRecibo, isOpen: true})
     }
     const onClickEditarDireccion= (row)=>{
         setdireccion_servicio(row.direccion_servicio??'')
@@ -104,6 +111,12 @@ const RastreadorRouters = () => {
                                         icon: 'mdi:trash-can',
                                         onClick: (row) => remove(row),
                                         color: "error",
+                                    },
+                                    {
+                                        icon: 'mdi:send',
+                                        onClick: (row) => send(row),
+                                        color: "primary",
+                                        tooltip: "Enviar",
                                     }
                                 ],
                                 align: "center",
@@ -184,6 +197,9 @@ const RastreadorRouters = () => {
                 </CardContent>
             </Card>
             <ModalAnular config={config} setConfig={setConfig} id={id} sede_id={sede}/>
+            <ModalEnvioReciboPago
+                config={configRecibo} setConfig={setConfigRecibo} cliente={cliente}
+            />
             <Dialog open={configEditar.isOpen} fullWidth>
                 <DialogTitle>Dirección del servicio</DialogTitle>
                 <br/>
