@@ -20,6 +20,7 @@ import {Icon} from "@iconify/react";
 import {LoadingButton} from "@mui/lab";
 import Routers from "../../Models/Routers";
 import ModalEnvioReciboPago from "./ModalEnvioReciboPago";
+import ModalDireccionServicio from "./ModalDireccionServicio";
 
 const RastreadorRouters = () => {
     const [data, setData] = useState([]);
@@ -36,10 +37,6 @@ const RastreadorRouters = () => {
     const [time, setTime]= useState(0)
     const [configEditar, setConfigEditar] = useState({isOpen: false})
     const [configRecibo, setConfigRecibo] = useState({isOpen: false})
-    const [direccion_servicio, inputdireccion_servicio,setdireccion_servicio ] = useInput({
-            initialState: '', placeholder: 'Direccion del Servicio'
-        }
-    )
     const [cliente, setCliente]= useState({})
     useEffect(()=>{
         setTime(2)
@@ -69,23 +66,8 @@ const RastreadorRouters = () => {
         setConfigRecibo({...configRecibo, isOpen: true})
     }
     const onClickEditarDireccion= (row)=>{
-        setdireccion_servicio(row.direccion_servicio??'')
-        setId(row.value)
+        setCliente(row)
         setConfigEditar({isOpen: true})
-    }
-    const save= ()=>{
-        Routers.editarDireccionClienteRouter({id, direccion_servicio})
-            .then(()=>{
-                setData(prev =>
-                    prev.map(element =>
-                        element.value === id
-                            ? { ...element, direccion_servicio }
-                            : element
-                    )
-                );
-                setConfigEditar({...config, isOpen: false})
-
-            })
     }
 
     return (
@@ -113,6 +95,12 @@ const RastreadorRouters = () => {
                                         color: "error",
                                     },
                                     {
+                                        icon: 'mdi:pencil',
+                                        onClick: (row) => onClickEditarDireccion(row),
+                                        color: "warning",
+                                        tooltip: "Editar",
+                                    },
+                                    {
                                         icon: 'mdi:send',
                                         onClick: (row) => send(row),
                                         color: "primary",
@@ -120,6 +108,7 @@ const RastreadorRouters = () => {
                                     }
                                 ],
                                 align: "center",
+                                cellStyle: {minWidth: '90px'},
                             },
                             {
                                 header: 'Fecha Pago',
@@ -181,14 +170,6 @@ const RastreadorRouters = () => {
                                     const {direccion_servicio} = row
                                     return (<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <span>{direccion_servicio ?? ''}</span>
-                                        <IconButton
-                                            title="Editar"
-                                            color="warning"
-                                            style={{ margin: 0, padding: 0 }}
-                                            onClick={() => onClickEditarDireccion(row)}
-                                        >
-                                            <Icon icon="mdi:pencil" />
-                                        </IconButton>
                                     </div>)
                                 },
                             }
@@ -200,33 +181,7 @@ const RastreadorRouters = () => {
             <ModalEnvioReciboPago
                 config={configRecibo} setConfig={setConfigRecibo} cliente={cliente}
             />
-            <Dialog open={configEditar.isOpen} fullWidth>
-                <DialogTitle>Dirección del servicio</DialogTitle>
-                <br/>
-                <DialogContent>
-                    <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
-                        {inputdireccion_servicio}
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <LoadingButton
-                        variant="contained"
-                        color="success"
-                        onClick={() => save()}
-                    >
-                        Guardar
-                    </LoadingButton>
-                    <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => {
-                            setConfigEditar({...config, isOpen: false})
-                        }}
-                    >
-                        Cancelar
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ModalDireccionServicio config={configEditar} setConfig={setConfigEditar} cliente={cliente} setData={setData}/>
         </Container>
     );
 };
