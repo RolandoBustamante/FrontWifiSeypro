@@ -79,6 +79,7 @@ const ListVentas = () => {
                         setLimit={setLimit}
                         loading={loading}
                         setPage={setPage}
+                        setPAge={setPage}
                         info={infoData}
                         pagination
                         columns={[

@@ -134,5 +134,15 @@ const Clientes={
             fetchPolicy: 'no-cache'
         });
     },
+    listaClientesRoutersHistorico: (page, limit, param)=>{
+        const query=gql(`
+            query listaClientesRoutersHistorico($page: Int, $limit: Int, $param: String){
+                listaClientesRoutersHistorico(page: $page, limit: $limit, param: $param){
+                    data
+                }
+            }
+        `)
+        return client.query({query, variables: {page, limit, param}, fetchPolicy: 'no-cache'})
+    },
 }
 export default Clientes

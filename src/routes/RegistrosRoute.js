@@ -10,7 +10,7 @@ const VehiculoPage= Loadable(lazy(()=>import('views/registros/vehiculos')))
 const RoutePage= Loadable(lazy(()=>import('views/registros/routes')))
 const SimsPage= Loadable(lazy(()=>import('views/registros/chips')))
 const ServiciosPage= Loadable(lazy(()=>import('views/registros/servicios')))
-const ClienteServicioPage= Loadable(lazy(()=>import('views/ClientesServicio')))
+const ClienteServicioPage= Loadable(lazy(()=>import('views/TABHistoricos')))
 
 const RegistrosRoute={
     path:'/registro',

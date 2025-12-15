@@ -10,7 +10,8 @@ import useSelect from "../../customHooks/useSelect";
 
 const detalleTipo=[
     {label: 'Pago',value: 'PAGO'},
-    {label: 'Mora',value: 'MORA'}
+    {label: 'Mora',value: 'MORA'},
+    {label: 'Reconexión',value: 'RECONEXION'}
 ]
 
 const ItemFacturas = ({item, setViews, views, setDetalle, detalle}) => {
