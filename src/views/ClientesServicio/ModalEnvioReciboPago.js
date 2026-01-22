@@ -117,7 +117,7 @@ const ModalEnvioReciboPago = ({config, setConfig, cliente}) => {
                 cliente_router_id: cliente.value,
                 periodo: periodoCobro,
                 enviarWhatsapp: sendWhatsapp,
-                enviarCorreo: setCorreo, numero: numeroWhatsapp, correo
+                enviarCorreo: sendCorreo, numero: numeroWhatsapp, correo
             })
             Toast.Remove();
             Toast.Success("Envio realizado");
