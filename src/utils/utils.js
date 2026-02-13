@@ -25,42 +25,79 @@ export const numeroALetras = (num) => {
     const CENTENAS = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"];
 
     const getCientos = (n) => {
+        if (n === 0) return "";
         if (n === 100) return "CIEN";
+
         const c = Math.floor(n / 100);
         const d = Math.floor((n % 100) / 10);
         const u = n % 10;
 
-        let result = CENTENAS[c];
+        // 🔹 1–9
+        if (c === 0 && d === 0) {
+            return UNIDADES[u];
+        }
+
+        let partes = [];
+
+        if (c > 0) {
+            partes.push(CENTENAS[c]);
+        }
+
+        // 🔹 11–19
         if (d === 1 && u > 0) {
             const especiales = ["ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE"];
-            return result + " " + (especiales[u - 1] || "DIECI" + UNIDADES[u]);
+            partes.push(especiales[u - 1] || "DIECI" + UNIDADES[u]);
+            return partes.join(" ");
         }
 
+        // 🔹 21–29
         if (d === 2 && u > 0) {
-            return result + " VEINTI" + UNIDADES[u];
+            partes.push("VEINTI" + UNIDADES[u]);
+            return partes.join(" ");
         }
 
-        return result + (DECENAS[d] ? " " + DECENAS[d] : "") + (u > 0 ? " Y " + UNIDADES[u] : "");
+        if (d > 0) {
+            partes.push(DECENAS[d]);
+        }
+
+        if (u > 0) {
+            if (d > 2) {
+                partes.push("Y " + UNIDADES[u]);
+            } else if (d === 0) {
+                partes.push(UNIDADES[u]);
+            }
+        }
+
+        return partes.join(" ");
     };
 
-    const entero = Math.floor(num);
-    const centimos = Math.round((num - entero) * 100);
+    const entero = Math.floor(Number(num) || 0);
+    const centimos = Math.round((Number(num) - entero) * 100);
 
     let literal = "";
-    if (entero === 0) literal = "CERO";
-    else if (entero <= 999) literal = getCientos(entero);
-    else if (entero < 1000000) {
+
+    if (entero === 0) {
+        literal = "CERO";
+    } else if (entero <= 999) {
+        literal = getCientos(entero);
+    } else if (entero < 1000000) {
         const miles = Math.floor(entero / 1000);
         const resto = entero % 1000;
-        literal = (miles === 1 ? "MIL" : getCientos(miles) + " MIL") + (resto > 0 ? " " + getCientos(resto) : "");
+
+        literal =
+            (miles === 1 ? "MIL" : getCientos(miles) + " MIL") +
+            (resto > 0 ? " " + getCientos(resto) : "");
     } else {
         literal = "UN MILLÓN O MÁS";
     }
 
     const cent = centimos.toString().padStart(2, "0");
 
-    return `${literal} CON ${cent}/100 SOLES`;
+    return `${literal} CON ${cent}/100 SOLES`
+        .replace(/\s+/g, " ")
+        .trim();
 };
+
 
 
 export const utilvalidarRuc = ruc => {
