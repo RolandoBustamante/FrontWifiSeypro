@@ -24,17 +24,25 @@ jobs:
       - name: Build del frontend
         run: CI=false npm run build
 
-      - name: Subir al dominio real (sin eliminar .htaccess)
+      # 🧪 Test conexión FTP (opcional pero útil para debug)
+      - name: Test conexión FTP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y netcat-openbsd
+          nc -vz ${{ secrets.FTP_SERVER }} 21
+
+      - name: Subir al dominio real (mantener .htaccess)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps   # usa ftp si tu hosting no soporta TLS
           port: 21
-          protocol: ftp
+          security: loose
+          timeout: 600000
           local-dir: ./build/
           server-dir: /domains/m2m.seypro.net.pe/public_html/
-          strip-components: 1
           dangerous-clean-slate: false
           exclude: |
-            .htaccess
+            **/.htaccess
