@@ -19,22 +19,19 @@ jobs:
           node-version: 18
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm ci
 
       - name: Build del frontend
         run: CI=false npm run build
 
-      - name: Subir al dominio real (sin eliminar .htaccess)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: Deploy via SSH (Hostinger)
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
-          local-dir: ./build/
-          server-dir: /domains/m2m.seypro.net.pe/public_html/
-          strip-components: 1
-          dangerous-clean-slate: false
-          exclude: |
-            .htaccess
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "build/**"
+          target: "domains/m2m.seypro.net.pe/public_html/"
+          strip_components: 1
+          overwrite: true
