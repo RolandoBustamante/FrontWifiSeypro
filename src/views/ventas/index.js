@@ -319,7 +319,7 @@ export default function Facturador() {
             legends: [
                 {
                     code: "1000",
-                    value: numeroALetras(montos.total)
+                    value: numeroALetras(montos.total).trim()
                 },
                 ...(montos.gratuito > 0
                     ? [{
