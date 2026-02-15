@@ -358,7 +358,7 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
             mtoImpVenta: montos.total,
             details,
             legends: [
-                { code: "1000", value: numeroALetras(montos.total) },
+                { code: "1000", value: numeroALetras(montos.total).trim() },
                 ...(montos.gratuito > 0
                     ? [
                         {
