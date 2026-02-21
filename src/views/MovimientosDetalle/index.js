@@ -68,10 +68,10 @@ const ListMovimientos = () => {
     }, [page, limit]);
 
     return (
-        <Container>
-            <Card>
-                <CardContent>
-                    <Grid container spacing={2} alignItems="center">
+        <Container maxWidth={false} disableGutters sx={{px: {xs: 2, sm: 3}, maxWidth: '100%'}}>
+            <Card sx={{overflow: 'hidden'}}>
+                <CardContent sx={{overflow: 'hidden'}}>
+                    <Grid container spacing={2} alignItems="center" sx={{minWidth: 0}}>
                         <Grid item xs={12} sm={6} md={4}>
                             {inputBuscar}
                         </Grid>

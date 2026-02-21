@@ -15,7 +15,7 @@ import {IconMenu2} from "@tabler/icons";
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
-const Header = ({handleLeftDrawerToggle}) => {
+const Header = ({handleLeftDrawerToggle, pendingCount, onOpenPendingDialog}) => {
     const theme = useTheme();
 
     return (
@@ -62,14 +62,16 @@ const Header = ({handleLeftDrawerToggle}) => {
             <Box sx={{flexGrow: 1}}/>
 
             {/* notification & profile */}
-            <NotificationSection/>
+            <NotificationSection pendingCount={pendingCount} onOpenDialog={onOpenPendingDialog}/>
             <ProfileSection/>
         </>
     );
 };
 
 Header.propTypes = {
-    handleLeftDrawerToggle: PropTypes.func
+    handleLeftDrawerToggle: PropTypes.func,
+    pendingCount: PropTypes.number,
+    onOpenPendingDialog: PropTypes.func
 };
 
 export default Header;

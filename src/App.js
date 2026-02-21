@@ -14,6 +14,7 @@ import themes from 'themes';
 // project imports
 import NavigationScroll from 'layout/NavigationScroll';
 import {ToastContainer} from 'react-toastify';
+import LandscapeGuard from 'components/LandscapeGuard';
 
 // ==============================|| APP ||============================== //
 
@@ -26,6 +27,7 @@ const App = () => {
         <AuthProvider>
             <ThemeProvider theme={themes(customization)}>
                 <CssBaseline />
+                <LandscapeGuard />
                 <NavigationScroll>
                     <Routes />
                 </NavigationScroll>

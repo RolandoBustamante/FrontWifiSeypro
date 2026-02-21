@@ -109,6 +109,16 @@ const Ventas = {
      }
     `)
         return client.query({query, variables: {page, limit, param, estado, desde, hasta}, fetchPolicy: 'no-cache'})
+    },
+    listarMovimientosPendientes: (param) => {
+        const query = gql(`
+      query listarMovimientosPendientes($param: String){
+        listarMovimientosPendientes(param: $param){
+          detallesJson
+        }
+      }
+    `);
+        return client.query({query, variables: {param}, fetchPolicy: 'no-cache'});
     }
 }
 export default Ventas

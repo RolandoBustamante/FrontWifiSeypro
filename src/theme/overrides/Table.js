@@ -6,6 +6,17 @@ export default function Table(theme) {
       styleOverrides: {
         root: {
           position: 'relative',
+          width: '100%',
+          maxWidth: '100%',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+        },
+      },
+    },
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          width: '100%',
         },
       },
     },

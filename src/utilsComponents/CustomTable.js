@@ -60,13 +60,15 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
         <TableContainer component={Paper}>
             <div style={{
                 maxHeight: 'calc(90vh - 200px)',
-                maxWidth: 'calc(85vw - 200px)',
+                width: '100%',
+                maxWidth: '100%',
+                minWidth: 0,
                 overflowY: 'auto',
                 overflowX: 'auto',
                 scrollbarWidth: 'thin',
                 scrollbarColor: `${theme.palette.primary.main} transparent`,
             }} className="custom-scroll">
-                <Table>
+                <Table style={{width: '100%'}}>
                     <TableHead style={{backgroundColor: theme.palette.secondary.main, padding: 0, margin: 0}}>
                         <TableRow style={{padding: 0, margin: 0}}>
                             {columns.map((column, index) => (

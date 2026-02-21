@@ -44,6 +44,14 @@ export default function GlobalStyles() {
           display: 'block',
           maxWidth: '100%',
         },
+        iframe: {
+          display: 'block',
+          maxWidth: '100%',
+        },
+        video: {
+          display: 'block',
+          maxWidth: '100%',
+        },
         ul: {
           margin: 0,
           padding: 0,

@@ -18,8 +18,10 @@ import {SET_MENU} from 'store/actions';
 import {IconChevronRight} from '@tabler/icons';
 import PropTypes from 'prop-types';
 import {useAuthContext} from "../../auth/useAuthContext";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {filtrarMenuConAccesos} from "../../utils/utils";
+import Ventas from "../../Models/Ventas";
+import PendientesCobroDialog from "../../components/PendientesCobroDialog";
 
 
 // styles
@@ -27,6 +29,9 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(({th
     ...theme.typography.mainContent,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
+    maxWidth: '100%',
+    minWidth: 0,
+    overflowX: 'hidden',
     transition: theme.transitions.create(
         'margin',
         open
@@ -71,6 +76,53 @@ const MainLayout = ({viewHeader = false}) => {
 
     const theme = useTheme();
     const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
+    const [pendientes, setPendientes] = useState([]);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const PENDIENTES_DIALOG_KEY = 'pendientesCobroDialogAt';
+    const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+
+    const parseDetallesJson = (detallesJson) => {
+        if (!detallesJson) return {items: [], mostrar: false};
+        if (typeof detallesJson === 'string') {
+            try {
+                return JSON.parse(detallesJson);
+            } catch {
+                return {items: [], mostrar: false};
+            }
+        }
+        return detallesJson;
+    };
+
+    const fetchPendientes = useCallback(async () => {
+        try {
+            const res = await Ventas.listarMovimientosPendientes('');
+            const detallesJson = res?.data?.listarMovimientosPendientes?.detallesJson;
+            const parsed = parseDetallesJson(detallesJson);
+            const items = Array.isArray(parsed?.items) ? parsed.items : [];
+            const mostrar = Boolean(parsed?.mostrar);
+            setPendientes(items);
+
+            if (mostrar && items.length > 0) {
+                const lastShown = Number(localStorage.getItem(PENDIENTES_DIALOG_KEY) || 0);
+                const now = Date.now();
+                if (now - lastShown >= SIX_HOURS_MS) {
+                    setDialogOpen(true);
+                    localStorage.setItem(PENDIENTES_DIALOG_KEY, String(now));
+                }
+            }
+        } catch (e) {
+            // silent
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!sesion) return;
+        fetchPendientes().then(r => r);
+        const id = setInterval(() => {
+            fetchPendientes().then(r => r);
+        }, SIX_HOURS_MS);
+        return () => clearInterval(id);
+    }, [fetchPendientes, sesion]);
     // Handle left drawer
     const leftDrawerOpened = useSelector((state) => state.customization.opened);
     const dispatch = useDispatch();
@@ -79,7 +131,7 @@ const MainLayout = ({viewHeader = false}) => {
     };
 
     return (
-        <Box sx={{display: 'flex'}}>
+        <Box sx={{display: 'flex', width: '100%', minWidth: 0, overflowX: 'hidden'}}>
             <CssBaseline/>
             {/* header */}
             <AppBar
@@ -93,7 +145,11 @@ const MainLayout = ({viewHeader = false}) => {
                 }}
             >
                 <Toolbar>
-                    <Header handleLeftDrawerToggle={handleLeftDrawerToggle}/>
+                    <Header
+                        handleLeftDrawerToggle={handleLeftDrawerToggle}
+                        pendingCount={pendientes.length}
+                        onOpenPendingDialog={() => setDialogOpen(true)}
+                    />
                 </Toolbar>
             </AppBar>
 
@@ -108,6 +164,11 @@ const MainLayout = ({viewHeader = false}) => {
                     <Breadcrumbs separator={IconChevronRight} navigation={navegacion} icon title rightAlign/>}
                 <Outlet/>
             </Main>
+            <PendientesCobroDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                items={pendientes}
+            />
             <Customization/>
         </Box>
     );
