@@ -64,7 +64,7 @@ const MovimientosPendientes = () => {
                 <Box
                   sx={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(90px, 120px) minmax(90px, 120px) minmax(90px, 140px) minmax(90px, 140px)',
+                gridTemplateColumns: 'minmax(90px, 110px) minmax(90px, 110px) minmax(120px, 170px) minmax(90px, 120px) minmax(140px, 200px) minmax(110px, 150px)',
                     gap: 1,
                     alignItems: 'center',
                     px: 1,
@@ -86,13 +86,19 @@ const MovimientosPendientes = () => {
                   <Typography variant="caption" color="text.secondary" sx={{fontWeight: 600}}>
                     F. Cobro
                   </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{fontWeight: 600}}>
+                    IMEI
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{fontWeight: 600}}>
+                    SIM
+                  </Typography>
                 </Box>
                 {movimientos.map((m, idx) => (
                   <Box
                     key={`${rowId}-mov-${idx}`}
                     sx={{
                       display: 'grid',
-                      gridTemplateColumns: 'minmax(90px, 120px) minmax(90px, 120px) minmax(90px, 140px) minmax(90px, 140px)',
+                      gridTemplateColumns: 'minmax(90px, 110px) minmax(90px, 110px) minmax(120px, 170px) minmax(90px, 120px) minmax(140px, 200px) minmax(110px, 150px)',
                       gap: 1,
                       alignItems: 'center',
                       px: 1,
@@ -104,13 +110,15 @@ const MovimientosPendientes = () => {
                     <Typography variant="body2">{m.periodo || '-'}</Typography>
                     <Typography variant="body2">{`S/ ${Number(m.monto || 0).toFixed(2)}`}</Typography>
                     {m.dias !== undefined && m.dias !== null ? (
-                      <Label variant="soft" color="error" sx={{textTransform: 'capitalize', width: 'fit-content'}}>
+                      <Label variant="soft" color="error" sx={{textTransform: 'capitalize', width: 'fit-content', whiteSpace: 'nowrap'}}>
                         {`${m.dias} días de retraso`}
                       </Label>
                     ) : (
                       <Typography variant="body2">-</Typography>
                     )}
                     <Typography variant="body2">{m.fecha_cobro || '-'}</Typography>
+                    <Typography variant="body2">{m.router?.imei || '-'}</Typography>
+                    <Typography variant="body2">{m.router?.sim || '-'}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -221,7 +229,7 @@ const MovimientosPendientes = () => {
                   header: '',
                   Cell: (row) => (
                     <IconButton size="small" onClick={() => handleToggleRow(row)}>
-                      <Icon icon={openRows.has(row.id) ? 'mdi:chevron-up' : 'mdi:chevron-down'} />
+                      <Icon icon={openRows.has(row.cliente?.id || row.cliente_id) ? 'mdi:chevron-up' : 'mdi:chevron-down'} />
                     </IconButton>
                   ),
                   align: 'center',
