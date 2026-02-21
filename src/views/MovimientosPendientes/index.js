@@ -16,7 +16,6 @@ const MovimientosPendientes = () => {
     initialState: '',
     placeholder: 'Buscar'
   });
-
   const fetchData = async () => {
     Toast.Remove();
     setLoading(true);
@@ -40,7 +39,6 @@ const MovimientosPendientes = () => {
       return next;
     });
   };
-
   const tableItems = data.map((row) => {
     const celulares = Array.isArray(row.cliente?.celulares) ? row.cliente.celulares : [];
     const movimientos = Array.isArray(row.movimientos) ? row.movimientos : [];
