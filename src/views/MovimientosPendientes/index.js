@@ -242,6 +242,11 @@ const MovimientosPendientes = () => {
                   align: 'left'
                 },
                 {
+                  header: 'Documento',
+                  Cell: (row) => row.cliente?.documento || '-',
+                  align: 'left'
+                },
+                {
                   header: 'Sede',
                   Cell: (row) => row.movimientos?.[0]?.sede || '-',
                   align: 'left'
