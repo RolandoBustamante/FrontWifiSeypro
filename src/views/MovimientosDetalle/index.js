@@ -7,7 +7,7 @@ import moment from 'moment';
 import Ventas from "../../Models/Ventas";
 import useSelect from "../../customHooks/useSelect";
 import Label from "../../components/label";
-import {margin} from "@mui/system";
+import useMountedRef from "../../customHooks/useMountedRef";
 
 const estadoOpciones = [
     {value: '', label: 'Todos'},
@@ -16,6 +16,7 @@ const estadoOpciones = [
 ];
 
 const ListMovimientos = () => {
+    const mountedRef = useMountedRef();
     const [data, setData] = useState([]);
     const [infoData, setInfoData] = useState({});
     const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ const ListMovimientos = () => {
 
     const fetchData = async () => {
         Toast.Remove();
-        setLoading(true);
+        if (mountedRef.current) setLoading(true);
         try {
             const res = await Ventas.litarMovimientos(
                 page,
@@ -53,14 +54,15 @@ const ListMovimientos = () => {
                 desde,
                 hasta
             );
+            if (!mountedRef.current) return;
             const {items, info} = res.data.listarMovimientosMes.data;
             setData(items);
             setInfoData(info);
         } catch (e) {
             console.log(e)
-            Toast.Error('Error al obtener movimientos');
+            if (mountedRef.current) Toast.Error('Error al obtener movimientos');
         }
-        setLoading(false);
+        if (mountedRef.current) setLoading(false);
     };
 
     useEffect(() => {

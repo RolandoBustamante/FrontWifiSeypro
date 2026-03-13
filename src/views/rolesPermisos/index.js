@@ -14,7 +14,7 @@ const RolesPermisos = () => {
 
     useEffect(() => {
         setLoading(true)
-        Rol.getRoles('id, nombre, descripcion, accesos')
+        Rol.getRoles('id, nombre, descripcion, accesos, es_repartidor')
             .then(response => {
                 const {listRol} = response.data
                 setRoles(listRol)

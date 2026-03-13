@@ -1,9 +1,11 @@
 import { ApolloClient, createHttpLink, InMemoryCache, split} from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws'
 import {getMainDefinition} from "@apollo/client/utilities";
 import {HOST_API_KEY, HOST_WS_API_KEY} from '../config-global';
+import Toast from './toastUtil';
 const httpLink = createHttpLink({uri: `${HOST_API_KEY}/graphql`,
 });
 const wsLink = new GraphQLWsLink(createClient({
@@ -25,13 +27,22 @@ const authLink = setContext((_, {headers}) => {
         };
     }
 );
+let networkToastShown = false;
+const errorLink = onError(({ networkError }) => {
+    if (!networkError || networkToastShown) return;
+    networkToastShown = true;
+    Toast.Warning('Problemas de conexión. Intenta nuevamente en unos segundos.');
+    setTimeout(() => {
+        networkToastShown = false;
+    }, 4000);
+});
 const combinedLink = split(
     ({query}) => {
         const {kind, operation} = getMainDefinition(query);
         return kind === 'OperationDefinition' && operation === 'subscription';
     },
     wsLink,
-    authLink.concat(httpLink)
+    errorLink.concat(authLink.concat(httpLink))
 );
 
 const client = new ApolloClient({

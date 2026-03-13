@@ -12,23 +12,20 @@ import { store } from 'store';
 // style + assets
 import 'assets/scss/style.scss';
 import config from './config';
-import ErrorBoundary from './ErrorBoundary';
+import RouteErrorBoundary from './RouteErrorBoundary';
 
 // ==============================|| REACT DOM RENDER  ||============================== //
 
 const container = document.getElementById('root');
-const root = createRoot(container); // createRoot(container!) if you use TypeScript
+const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <BrowserRouter basename={config.basename}>
-        <ErrorBoundary>
-            <App />
-        </ErrorBoundary>
+      <RouteErrorBoundary>
+        <App />
+      </RouteErrorBoundary>
     </BrowserRouter>
   </Provider>
 );
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();

@@ -30,7 +30,7 @@ const Rol={
     createOrUpdateRol: (data)=>{
         const mutation=gql(`mutation createOrUpdateRol($data: JSONObject!){
             createOrUpdateRol(data: $data){
-                id, descripcion, nombre, accesos
+                id, descripcion, nombre, accesos, es_repartidor
             }
         }`)
         return client.mutate({mutation, variables:{data}, fetchPolicy: 'no-cache'})

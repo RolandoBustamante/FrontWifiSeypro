@@ -28,6 +28,7 @@ import {Icon} from "@iconify/react";
 import MyDropzone from "../../components/MyDropzone";
 import {LoadingButton} from "@mui/lab";
 import DialogPdfViewer from "../../components/DialogPdfViewer";
+import useMountedRef from "../../customHooks/useMountedRef";
 
 
 const tiposComprobante = [
@@ -38,6 +39,7 @@ const tiposComprobante = [
 
 
 export default function Facturador() {
+    const mountedRef = useMountedRef();
     const [serie, inputSerie, setSerie] = useInput({
         typeState: 'text',
         placeholder: 'Serie',
@@ -117,12 +119,17 @@ export default function Facturador() {
         }
     }, [infoCliente])
     useEffect(() => {
+        let cancelled = false;
         TipoVenta.getListTipoBancos()
             .then(response => {
+                if (cancelled || !mountedRef.current) return;
                 const {listTipoPago} = response.data
                 setTipoVentas(listTipoPago)
             })
-    }, [])
+        return () => {
+            cancelled = true;
+        }
+    }, [mountedRef])
     useEffect(() => {
         if (ventasTipo) {
             const elementos = []
@@ -181,19 +188,27 @@ export default function Facturador() {
         if (details) calcularTotales(details)
     }, [details])
     useEffect(() => {
-        if (comprobante) Clientes.infoSerieNumero(comprobante).then(response => {
+        if (!comprobante) return;
+        let cancelled = false;
+        Clientes.infoSerieNumero(comprobante).then(response => {
+            if (cancelled || !mountedRef.current) return;
             const data = response.data.obtenerSerieNumero
             setCorrelativo(data.numero ?? '')
             setSerie(data.serie ?? '')
         })
-    }, [comprobante])
+        return () => {
+            cancelled = true;
+        }
+    }, [comprobante, mountedRef])
     useEffect(() => {
         if (!clienteRouter || clienteRouter === '') return
-        setLoading(true)
+        if (mountedRef.current) setLoading(true)
         setInfoCliente({})
         setViews([])
         setDetalle([])
+        let cancelled = false;
         Clientes.infoFacturacion(clienteRouter).then(response => {
+            if (cancelled || !mountedRef.current) return;
             const {obtenerInfo} = response.data
             if (obtenerInfo.data) {
                 const {cliente, movimientos, direccion_servicio} = obtenerInfo.data
@@ -213,7 +228,10 @@ export default function Facturador() {
                 setLoading(false)
             }
         })
-    }, [clienteRouter])
+        return () => {
+            cancelled = true;
+        }
+    }, [clienteRouter, mountedRef])
     const convertirItem = (item) => {
         const cantidad = 1;
         const descripcion = `${item.servicio}(${item.tipo_movimiento})`;
@@ -398,6 +416,7 @@ export default function Facturador() {
         setIsLoading(true)
         try {
             const response =(await Ventas.emitirFactura({jsonFinal, doc, tipoPago, views, clienteRouter, nroOperacion}))
+            if (!mountedRef.current) return;
             const res= response?.data?.emitirFactura??{}
             if (res?.data?.success && res?.data?.pdfUrl) {
                 setPdfUrl(res.data.pdfUrl);
@@ -411,6 +430,7 @@ export default function Facturador() {
                 setIsLoading(false)
             }
         }catch (e) {
+            if (!mountedRef.current) return;
             Toast.Remove()
             const msg =
                 e?.graphQLErrors?.[0]?.message ||

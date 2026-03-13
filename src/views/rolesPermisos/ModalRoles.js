@@ -1,4 +1,4 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack} from "@mui/material";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Stack} from "@mui/material";
 import {LoadingButton} from "@mui/lab";
 import PropTypes from 'prop-types';
 import useInput from "../../customHooks/useInput";
@@ -6,7 +6,15 @@ import menuItems from "../../menu-items";
 import React, {Fragment, useEffect, useState} from "react";
 import Rol from "../../Models/Rol";
 import Toast from "../../utils/toastUtil";
+import useSwitch from "../../customHooks/useSwitch";
 
+const normalizeRoleName = (value = "") =>
+    value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
 
 const ModalRoles = ({config, setConfig, rol, setRoles}) => {
     ModalRoles.propTypes = {
@@ -24,12 +32,15 @@ const ModalRoles = ({config, setConfig, rol, setRoles}) => {
     const [descripcion, inputDescripcion, setDescripcion, , ,] = useInput({
         placeholder: "Descripción",
     })
+    const [esRepartidor, switchRepartidor, setEsRepartidor, setDisabledSwitch] = useSwitch({initialState: false})
     const [accesos, setAccesos] = useState([])
     const [disabled, setDisabled] = useState(false)
     useEffect(() => {
         setDisabled(rol && rol.id === 'd10503e9-847b-48d6-a9ff-a0f182974300')
         setNombre(rol.nombre ?? '')
         setDescripcion(rol.descripcion ?? '')
+        setEsRepartidor(Boolean(rol.es_repartidor))
+        setDisabledSwitch(rol && rol.id === 'd10503e9-847b-48d6-a9ff-a0f182974300')
         setAccesos(rol.accesos ?? [])
     }, [rol])
     const renderItems = (items) => {
@@ -91,8 +102,27 @@ const ModalRoles = ({config, setConfig, rol, setRoles}) => {
         }
     }, [menu, rol])
     const guardar = async () => {
+        const nombreTrim = (nombre ?? '').trim()
+        if (!nombreTrim) {
+            Toast.Warning('El nombre del rol es requerido')
+            return
+        }
+        try {
+            const {data: rolesData} = await Rol.getRoles('id, nombre')
+            const list = rolesData?.listRol ?? []
+            const target = normalizeRoleName(nombreTrim)
+            const duplicated = list.find((item) => item.id !== rol?.id && normalizeRoleName(item.nombre) === target)
+            if (duplicated) {
+                Toast.Warning('Ya existe un rol con ese nombre')
+                return
+            }
+        } catch (e) {
+            Toast.Warning('No se pudo validar nombre de rol')
+            return
+        }
+
         Toast.Waiting('Guardando...')
-        let object = {nombre, descripcion, accesos}
+        let object = {nombre: nombreTrim, descripcion, accesos, es_repartidor: esRepartidor}
         if(rol.id) object={...object, id: rol.id}
         try {
             const {data} = await Rol.createOrUpdateRol(object)
@@ -125,6 +155,11 @@ const ModalRoles = ({config, setConfig, rol, setRoles}) => {
                 <Stack direction={{xs: 'column', sm: 'row'}} style={{paddingBottom: 10, paddingTop: 5}} spacing={2}>
                     {inputNombre}
                     {inputDescripcion}
+                    <FormControlLabel
+                        control={switchRepartidor}
+                        label="Rol Repartidor"
+                        labelPlacement="start"
+                    />
                 </Stack>
                 <Stack>
                     <div style={{

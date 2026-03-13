@@ -18,6 +18,8 @@ const Rastreador = () => {
     const colorState = {
         ACTIVO: 'success',
         LIBRE: 'primary',
+        EN_ENVIO: 'warning',
+        POR_ASIGNAR: 'secondary',
         USADO: 'warning',
         ELIMINADO: 'error',
         DEVUELTO: '#8f2ebd'
@@ -41,6 +43,8 @@ const Rastreador = () => {
         optionsState: [
             {value: 'ACTIVO', label: 'ACTIVO'},
             {value: 'LIBRE', label: 'LIBRE'},
+            {value: 'EN_ENVIO', label: 'EN ENVIO'},
+            {value: 'POR_ASIGNAR', label: 'POR ASIGNAR'},
             {value: 'ELIMINADO', label: 'ELIMINADO'},
             {value: 'DEVUELTO', label: 'DEVUELTO'},
             {value: 'NODEVUELTO', label: 'NO DEVUELTO'},

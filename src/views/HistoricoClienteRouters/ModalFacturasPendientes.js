@@ -33,6 +33,7 @@ import Toast from "../../utils/toastUtil";
 import MyDropzone from "../../components/MyDropzone";
 import DialogPdfViewer from "../../components/DialogPdfViewer";
 import Clientes from "../../Models/Clientes";
+import useMountedRef from "../../customHooks/useMountedRef";
 
 const tiposComprobante = [
     { value: "01", label: "Factura" },
@@ -55,6 +56,7 @@ const tiposComprobante = [
  *   }
  */
 export default function ModalFacturarPendientes({ open, onClose, selectedRow }) {
+    const mountedRef = useMountedRef();
     const [serie, inputSerie, setSerie] = useInput({ typeState: "text", placeholder: "Serie", disabled: true });
     const [correlativo, inputCorrelativo, setCorrelativo] = useInput({ typeState: "text", placeholder: "Número", disabled: true });
     const [fecha, inputFecha] = useInput({ typeState: "date", placeholder: "Fecha Emisión", initialState: moment().format("YYYY-MM-DD") });
@@ -82,12 +84,18 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
     const [pdfUrl, setPdfUrl] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
-        if (comprobante) Clientes.infoSerieNumero(comprobante).then(response => {
+        if (!comprobante) return;
+        let cancelled = false;
+        Clientes.infoSerieNumero(comprobante).then(response => {
+            if (cancelled || !mountedRef.current) return;
             const data = response.data.obtenerSerieNumero
             setCorrelativo(data.numero ?? '')
             setSerie(data.serie ?? '')
         })
-    }, [comprobante])
+        return () => {
+            cancelled = true;
+        };
+    }, [comprobante, mountedRef])
     // =========================
     // Inicialización desde selectedRow
     // =========================
@@ -95,7 +103,7 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
         if (!open) return;
         if (!selectedRow?.value) return;
 
-        setLoading(true);
+        if (mountedRef.current) setLoading(true);
         setInfoCliente({});
         setViews([]);
         setDetalle([]);
@@ -137,8 +145,8 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
             setDetalle((prev) => [...prev, mov.id]);
         }
 
-        setLoading(false);
-    }, [open, selectedRow]);
+        if (mountedRef.current) setLoading(false);
+    }, [open, selectedRow, mountedRef]);
 
     // =========================
     // Comprobante según doc del cliente (tu lógica intacta)
@@ -184,11 +192,16 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
     // Tipos de pago (tu lógica intacta)
     // =========================
     useEffect(() => {
+        let cancelled = false;
         TipoVenta.getListTipoBancos().then((response) => {
+            if (cancelled || !mountedRef.current) return;
             const { listTipoPago } = response.data;
             setTipoVentas(listTipoPago);
         });
-    }, []);
+        return () => {
+            cancelled = true;
+        };
+    }, [mountedRef]);
 
     useEffect(() => {
         if (ventasTipo) {
@@ -416,6 +429,7 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
                 clienteRouter,
                 nroOperacion
             });
+            if (!mountedRef.current) return;
 
             const res = response?.data?.emitirFactura ?? {};
             if (res?.data?.success && res?.data?.pdfUrl) {
@@ -430,6 +444,7 @@ export default function ModalFacturarPendientes({ open, onClose, selectedRow }) 
                 setIsLoading(false);
             }
         } catch (e) {
+            if (!mountedRef.current) return;
             Toast.Remove();
             const msg = e?.graphQLErrors?.[0]?.message || e?.message || "Ocurrió un error inesperado";
             Toast.Error(msg);
