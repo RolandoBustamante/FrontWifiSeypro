@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import Chart from 'react-apexcharts';
@@ -27,6 +27,7 @@ import { gridSpacing } from 'store/constant';
 import Label from 'components/label';
 import Toast from 'utils/toastUtil';
 import DashboardModel from '../../../Models/Dashboard';
+import { useAuthContext } from '../../../auth/useAuthContext';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('es-PE', {
@@ -110,9 +111,21 @@ SummaryCard.propTypes = {
 
 const Dashboard = () => {
   const theme = useTheme();
+  const { sesion, selectSede } = useAuthContext();
   const [periodo, setPeriodo] = useState(moment().format('YYYY-MM'));
   const [loading, setLoading] = useState(true);
   const [dashboard, setDashboard] = useState(null);
+
+  const onChangeSede = async (sedeId) => {
+    if (!sedeId || sedeId === sesion?.sede_seleccionada) return;
+    try {
+      setLoading(true);
+      await selectSede(sedeId);
+    } catch (error) {
+      Toast.Error(error?.graphQLErrors?.[0]?.message || error.message);
+      setLoading(false);
+    }
+  };
 
   const loadDashboard = async () => {
     try {
@@ -128,7 +141,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboard();
-  }, [periodo]);
+  }, [periodo, sesion?.sede_seleccionada]);
 
   const resumen = dashboard?.resumen ?? {};
   const estadosRouters = dashboard?.estadosRouters ?? [];
@@ -152,15 +165,15 @@ const Dashboard = () => {
         tone: summaryCardStyles[1]
       },
       {
-        title: 'Deuda pendiente',
-        value: formatCurrency(resumen.montoDeudaPendiente),
-        subtitle: `${formatNumber(resumen.deudasPendientes)} cuotas pendientes`,
+        title: 'Deuda vencida',
+        value: formatCurrency(resumen.montoDeudaVencida),
+        subtitle: `${formatNumber(resumen.deudasVencidas)} cuotas vencidas | abierta ${formatCurrency(resumen.montoDeudaPendiente)}`,
         tone: summaryCardStyles[2]
       },
       {
         title: 'Routers en envio',
         value: formatNumber(resumen.routersEnEnvio),
-        subtitle: `${formatNumber(resumen.asignacionesActivas)} asignaciones activas`,
+        subtitle: `${formatNumber(resumen.asignacionesActivas)} routers a cargo de repartidores`,
         tone: summaryCardStyles[3]
       },
       {
@@ -172,7 +185,7 @@ const Dashboard = () => {
       {
         title: 'Recojos activos',
         value: formatNumber(resumen.recojosActivos),
-        subtitle: `${formatNumber(resumen.clientesConDeuda)} clientes con deuda`,
+        subtitle: `${formatNumber(resumen.clientesConDeudaVencida)} clientes con deuda vencida`,
         tone: summaryCardStyles[5]
       }
     ],
@@ -264,7 +277,7 @@ const Dashboard = () => {
       options: {
         chart: { type: 'donut', fontFamily: theme.typography.fontFamily },
         labels: estadosRouters.map((item) => item.label),
-        colors: ['#0EA5E9', '#8B5CF6', '#F97316', '#14B8A6', '#64748B'],
+        colors: ['#0EA5E9', '#8B5CF6', '#F97316', '#14B8A6', '#64748B', '#DC2626'],
         legend: { position: 'bottom' },
         dataLabels: { enabled: true },
         tooltip: {
@@ -279,133 +292,184 @@ const Dashboard = () => {
   );
 
   return (
-    <Grid container spacing={gridSpacing}>
-      <Grid item xs={12}>
-        <MainCard border={false}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
-            <Box>
-              <Typography variant="h2">Dashboard operativo</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
-                Ventas, cobranzas, deuda, altas y movimiento real de routers por sede.
-              </Typography>
-            </Box>
-            <TextField
-              label="Periodo"
-              type="month"
-              size="small"
-              value={periodo}
-              onChange={(event) => setPeriodo(event.target.value)}
-              InputLabelProps={{ shrink: true }}
-              sx={{ minWidth: 180 }}
-            />
-          </Stack>
-        </MainCard>
-      </Grid>
-
-      {cards.map((card) => (
-        <Grid item xs={12} sm={6} lg={4} xl={2} key={card.title}>
-          <SummaryCard {...card} />
-        </Grid>
-      ))}
-
-      <Grid item xs={12} lg={8}>
-        <MainCard border={false}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="h4">Ventas y cobranzas</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Ultimos 6 meses en base a operaciones emitidas y movimientos pagados.
-              </Typography>
-            </Box>
-            {loading ? <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box> : <Chart options={ventasChart.options} series={ventasChart.series} type="bar" height={330} />}
-          </Stack>
-        </MainCard>
-      </Grid>
-
-      <Grid item xs={12} lg={4}>
-        <MainCard border={false}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="h4">Estados de routers</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Distribucion actual del inventario operativo.
-              </Typography>
-            </Box>
-            {loading ? <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box> : <Chart options={estadosChart.options} series={estadosChart.series} type="donut" height={330} />}
-          </Stack>
-        </MainCard>
-      </Grid>
-
-      <Grid item xs={12} lg={7}>
-        <MainCard border={false}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="h4">Nuevos servicios</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Servicios nuevos registrados en los ultimos 6 meses.
-              </Typography>
-            </Box>
-            {loading ? <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box> : <Chart options={altasChart.options} series={altasChart.series} type="area" height={320} />}
-          </Stack>
-        </MainCard>
-      </Grid>
-
-      <Grid item xs={12} lg={5}>
-        <MainCard border={false}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="h4">Indicadores operativos</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Lectura rapida del estado comercial y logistico.
-              </Typography>
-            </Box>
-            <Stack spacing={1.5}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1">Clientes nuevos del mes</Typography>
-                <Label color="info">{formatNumber(resumen.clientesNuevosMes)}</Label>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1">Clientes con deuda</Typography>
-                <Label color="warning">{formatNumber(resumen.clientesConDeuda)}</Label>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1">Routers usados</Typography>
-                <Label color="success">{formatNumber(resumen.routersUsados)}</Label>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1">Routers devueltos</Typography>
-                <Label color="default">{formatNumber(resumen.routersDevueltos)}</Label>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1">Asignaciones activas</Typography>
-                <Label color="secondary">{formatNumber(resumen.asignacionesActivas)}</Label>
+    <Box sx={{ position: 'relative' }}>
+      {loading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255,255,255,0.45)',
+            backdropFilter: 'blur(1.5px)',
+            borderRadius: 2
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
+      <Grid container spacing={gridSpacing} sx={{ opacity: loading ? 0.55 : 1, transition: 'opacity 0.2s ease' }}>
+        <Grid item xs={12}>
+          <MainCard border={false}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
+              <Box>
+                <Typography variant="h2">Dashboard operativo</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                  Ventas, cobranzas, deuda, altas y movimiento real de routers por sede.
+                </Typography>
+              </Box>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField
+                  select
+                  label="Sede"
+                  size="small"
+                  value={sesion?.sede_seleccionada || ''}
+                  onChange={(event) => onChangeSede(event.target.value)}
+                  SelectProps={{ native: true }}
+                  sx={{ minWidth: 220 }}
+                >
+                  {(sesion?.sedes || []).map((sede) => (
+                    <option key={sede.id} value={sede.id}>
+                      {sede.nombre}
+                    </option>
+                  ))}
+                </TextField>
+                <TextField
+                  label="Periodo"
+                  type="month"
+                  size="small"
+                  value={periodo}
+                  onChange={(event) => setPeriodo(event.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ minWidth: 180 }}
+                />
               </Stack>
             </Stack>
-            <Divider />
-            <Box>
-              <Typography variant="subtitle1">Sede actual</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {dashboard?.sedeId ? 'Dashboard filtrado por la sede seleccionada del usuario.' : 'Dashboard global sin filtro de sede.'}
-              </Typography>
-            </Box>
-          </Stack>
-        </MainCard>
-      </Grid>
+          </MainCard>
+        </Grid>
 
-      <Grid item xs={12}>
-        <MainCard border={false}>
-          <Stack spacing={2.5}>
-            <Box>
-              <Typography variant="h4">Actividad reciente</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Ultimos movimientos comerciales y logisticos registrados.
-              </Typography>
-            </Box>
-            {loading ? (
-              <Box display="flex" justifyContent="center" py={6}>
-                <CircularProgress />
+        {cards.map((card) => (
+          <Grid item xs={12} sm={6} lg={4} xl={2} key={card.title}>
+            <SummaryCard {...card} />
+          </Grid>
+        ))}
+
+        <Grid item xs={12} lg={8}>
+          <MainCard border={false}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="h4">Ventas y cobranzas</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Ultimos 6 meses en base a operaciones emitidas y movimientos pagados.
+                </Typography>
               </Box>
-            ) : (
+              <Chart options={ventasChart.options} series={ventasChart.series} type="bar" height={330} />
+            </Stack>
+          </MainCard>
+        </Grid>
+
+        <Grid item xs={12} lg={4}>
+          <MainCard border={false}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="h4">Estados de routers</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Distribucion actual del inventario operativo. No depende del periodo seleccionado.
+                </Typography>
+              </Box>
+              <Chart options={estadosChart.options} series={estadosChart.series} type="donut" height={330} />
+              <Stack spacing={1}>
+                {estadosRouters.map((item) => (
+                  <Stack
+                    key={item.label}
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography variant="body2">{item.label}</Typography>
+                    <Label color="default">{formatNumber(item.value)}</Label>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+          </MainCard>
+        </Grid>
+
+        <Grid item xs={12} lg={7}>
+          <MainCard border={false}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="h4">Nuevos servicios</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Servicios nuevos registrados en los ultimos 6 meses.
+                </Typography>
+              </Box>
+              <Chart options={altasChart.options} series={altasChart.series} type="area" height={320} />
+            </Stack>
+          </MainCard>
+        </Grid>
+
+        <Grid item xs={12} lg={5}>
+          <MainCard border={false}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="h4">Indicadores operativos</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Lectura rapida del estado comercial y logistico.
+                </Typography>
+              </Box>
+              <Stack spacing={1.5}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Clientes nuevos del mes</Typography>
+                  <Label color="info">{formatNumber(resumen.clientesNuevosMes)}</Label>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Clientes con deuda vencida</Typography>
+                  <Label color="warning">{formatNumber(resumen.clientesConDeudaVencida)}</Label>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Clientes con deuda abierta</Typography>
+                  <Label color="info">{formatNumber(resumen.clientesConDeuda)}</Label>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Routers usados</Typography>
+                  <Label color="success">{formatNumber(resumen.routersUsados)}</Label>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Routers devueltos</Typography>
+                  <Label color="default">{formatNumber(resumen.routersDevueltos)}</Label>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Routers no devueltos</Typography>
+                  <Label color="error">{formatNumber(resumen.routersNoDevueltos)}</Label>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body1">Routers a cargo de repartidores</Typography>
+                  <Label color="secondary">{formatNumber(resumen.asignacionesActivas)}</Label>
+                </Stack>
+              </Stack>
+              <Divider />
+              <Box>
+                <Typography variant="subtitle1">Sede actual</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {dashboard?.sedeId ? 'Dashboard filtrado por la sede seleccionada del usuario.' : 'Dashboard global sin filtro de sede.'}
+                </Typography>
+              </Box>
+            </Stack>
+          </MainCard>
+        </Grid>
+
+        <Grid item xs={12}>
+          <MainCard border={false}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography variant="h4">Actividad reciente</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Ultimos movimientos comerciales y logisticos registrados.
+                </Typography>
+              </Box>
               <List disablePadding>
                 {actividadReciente.length === 0 && (
                   <ListItem disableGutters>
@@ -443,12 +507,13 @@ const Dashboard = () => {
                   </React.Fragment>
                 ))}
               </List>
-            )}
-          </Stack>
-        </MainCard>
+            </Stack>
+          </MainCard>
+        </Grid>
       </Grid>
-    </Grid>
+    </Box>
   );
 };
 
 export default Dashboard;
+

@@ -51,7 +51,7 @@ const ListVentas = () => {
   }, [buscar]);
 
   const handleIconClick = (row) => {
-    const document = [{ nombre: `Número Operación: ${row.nro_operacion}`, url: row.operacion_url }];
+    const document = [{ nombre: `NÃºmero OperaciÃ³n: ${row.nro_operacion}`, url: row.operacion_url }];
     setDocumentos(document);
     setConfigView(true);
   };
@@ -130,7 +130,7 @@ const ListVentas = () => {
                   }}
                   style={{ cursor: 'pointer' }}
                 >
-                  {row.open ? '??' : '??'}
+                  {row.open ? 'ðŸ‘‡' : 'ðŸ‘‰'}
                 </span>
               ),
               align: 'center'
@@ -145,7 +145,7 @@ const ListVentas = () => {
               align: 'center'
             },
             {
-              header: 'Acción',
+              header: 'AcciÃ³n',
               align: 'center',
               Cell: (row) => (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
@@ -194,7 +194,7 @@ const ListVentas = () => {
                               const { anularOperacion } = res.data;
                               Toast.Remove();
                               if (anularOperacion.success) {
-                                Toast.Success('Nota de crédito emitida correctamente');
+                                Toast.Success('Nota de crÃ©dito emitida correctamente');
                               } else {
                                 Toast.Error('Error al emitir la nota');
                               }
@@ -244,7 +244,7 @@ const ListVentas = () => {
             { header: 'Serie', accessor: 'serie' },
             { header: 'Correlativo', accessor: 'correlativo' },
             {
-              header: 'Fecha Emisión',
+              header: 'Fecha EmisiÃ³n',
               accessor: 'fechaEmision',
               Cell: (row) => moment(row.fechaEmision).format('YYYY-MM-DD')
             },
@@ -283,3 +283,4 @@ const ListVentas = () => {
   );
 };
 export default ListVentas;
+

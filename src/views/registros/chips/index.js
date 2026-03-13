@@ -9,8 +9,10 @@ import Sims from "../../../Models/Sims";
 import ModalSims from "./components/ModalSims";
 import Label from "../../../components/label";
 import useInput from "../../../customHooks/useInput";
+import useMountedRef from "../../../customHooks/useMountedRef";
 
 const Sim = () => {
+    const mountedRef = useMountedRef();
     const [data, setData] = useState([])
     const [config, setConfig] = useState({isOpen: false})
     const [sedes, setSedes] = useState([])
@@ -27,22 +29,27 @@ const Sim = () => {
         setTime(2)
     }, [buscar])
     useEffect(()=>{
-        setTimeout(()=>{
-            setTime(0)
+        if (!time) return undefined
+        const timer = setTimeout(()=>{
+            if (mountedRef.current) {
+                setTime(0)
+            }
         },time*1000)
-    },[time])
+        return () => clearTimeout(timer)
+    },[time, mountedRef])
 
     useEffect(() => {
         if(time>0) return
         setLoading(true)
         Sims.listSims(page, limit, buscar)
             .then(response => {
+                if (!mountedRef.current) return
                 const {allChips, info} = response.data.listChips.data
                 setData(allChips)
                 setInfoData(info)
                 setLoading(false)
             })
-    }, [time, limit, page])
+    }, [time, limit, page, buscar, mountedRef])
 
     const editChip = (row) => {
         setChip(row)
@@ -50,10 +57,11 @@ const Sim = () => {
     }
     useEffect(() => {
         Usuario.allSedes().then(response => {
+            if (!mountedRef.current) return
             const {allSedes} = response.data
             setSedes(allSedes)
         })
-    }, [])
+    }, [mountedRef])
     const rowCollapse = (row) => {
         const {router} = row;
         return (
@@ -165,7 +173,7 @@ const Sim = () => {
                             Cell: (row) => {
                                 const {sede_id, usado} = row
                                 const elemento = sedes.find(element => element.id === sede_id)
-                                return (<div>{usado ? '-' : elemento.nombre}</div>)
+                                return (<div>{usado ? '-' : (elemento?.nombre ?? '-')}</div>)
                             },
                             align: "center",
                         },
