@@ -53,7 +53,6 @@ const NavGroup = ({ item }) => {
     </>
   );
 };
-
 NavGroup.propTypes = {
   item: PropTypes.object
 };
