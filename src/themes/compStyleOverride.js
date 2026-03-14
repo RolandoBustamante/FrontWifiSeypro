@@ -1,5 +1,6 @@
 export default function componentStyleOverrides(theme) {
-  const bgColor = theme.colors?.grey50;
+  const isDark = theme?.customization?.navType === 'dark';
+  const bgColor = isDark ? theme.colors?.darkLevel1 : theme.colors?.grey50;
   return {
     MuiButton: {
       styleOverrides: {
@@ -178,8 +179,8 @@ export default function componentStyleOverrides(theme) {
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          color: theme.paper,
-          background: theme.colors?.grey700
+          color: theme.colors?.paper,
+          background: isDark ? theme.colors?.darkLevel2 : theme.colors?.grey700
         }
       }
     }

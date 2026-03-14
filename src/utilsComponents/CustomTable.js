@@ -107,14 +107,14 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
                                 <TableRow key={rowIndex} style={{
                                     padding: 0,
                                     margin: 0,
-                                    backgroundColor: rowIndex % 2 === 0 ? '#f2f2f2' : 'white'
+                                    backgroundColor: rowIndex % 2 === 0 ? theme.palette.action.hover : theme.palette.background.paper
                                 }}>
                                     {columns.map((column, colIndex) => {
                                         if (column.buttons) {
                                             return (
                                                 <TableCell key={colIndex}
                                                            style={{
-                                                               border: `1px solid black`,
+                                                               border: `1px solid ${theme.palette.divider}`,
                                                                padding: 0, margin: 0, textAlign: column.align || 'start',
                                                                ...(column.cellStyle || {})
                                                            }}>
@@ -133,7 +133,7 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
                                             key={colIndex}
                                             style={{
                                                 textAlign: column.align || 'start',
-                                                border: `1px solid black`,
+                                                border: `1px solid ${theme.palette.divider}`,
                                                 padding: 0,
                                                 margin: 0,
                                                 ...(column.cellStyle || {})
@@ -142,7 +142,7 @@ const CustomTable = ({columns, data, getRowProps, loading = false, info, paginat
                                 </TableRow>
                                 {
                                     row.open && <TableRow>
-                                        <TableCell colSpan={columns.length} style={{border: `1px solid black`}} >
+                                        <TableCell colSpan={columns.length} style={{border: `1px solid ${theme.palette.divider}`}} >
                                             <Collapse in={row.open}  sx={{ bgcolor: 'background.neutral' }}>
                                                 {row.collapseElement??<></>}
                                             </Collapse>

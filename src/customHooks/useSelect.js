@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {FormControl, InputLabel, MenuItem, Select} from '@mui/material';
+import {FormControl, FormHelperText, InputLabel, MenuItem, Select} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 export default function useSelect({
                                       initialState = '',
@@ -10,6 +11,7 @@ export default function useSelect({
                                       backgroundColor = '',
                                       placeholder = 'Seleccionar...'
                                   }) {
+    const theme = useTheme();
     const [value, setValue] = useState(initialState);
     const [options, setOptions] = useState(optionsState);
     const [invalid, setInvalid] = useState(false);
@@ -24,11 +26,10 @@ export default function useSelect({
         setIsMenuOpen(false);
     };
     const selectElement = (
-        <FormControl fullWidth>
+        <FormControl fullWidth error={invalid}>
             <InputLabel
                 id="select-label"
                 shrink={value || isMenuOpen ? true : null}
-                style={{ color: value || isMenuOpen ? 'black' : 'rgba(0, 0, 0, 0.54)' }}
             >
                 {placeholder}
             </InputLabel>
@@ -49,7 +50,7 @@ export default function useSelect({
                 }}
                 onOpen={handleOpen}
                 style={{
-                    backgroundColor: invalid ? '#dc3545' : backgroundColor,
+                    backgroundColor: invalid ? theme.palette.error.light : backgroundColor,
                     padding: 2,
                     borderRadius: 5
                 }}
@@ -64,8 +65,9 @@ export default function useSelect({
                     </MenuItem>
                 ))}
             </Select>
-            {invalid ? <small
-                className="text-danger" style={{color:'red'}}>{message === '' ? `Debe seleccionar ${placeholder}` : message}</small> : null}
+            {invalid && (
+                <FormHelperText>{message === '' ? `Debe seleccionar ${placeholder}` : message}</FormHelperText>
+            )}
         </FormControl>
 
     );

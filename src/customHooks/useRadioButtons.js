@@ -1,34 +1,30 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 
-function useRadioButtons(initialValue, options, placeholder,disabled) {
+function useRadioButtons(initialValue, options, placeholder, disabled) {
     const [selectedOption, setSelectedOption] = useState(initialValue);
+
     const RadioButtons = () => (
-        <div style={{ position: "relative", marginBottom: 10 }}>
-            <div style={{ position: "absolute", top: -20, left: 0 }}>{placeholder}</div>
-            <div style={{ display: "flex", flexDirection: "row" }}>
+        <FormControl>
+            {placeholder && <FormLabel>{placeholder}</FormLabel>}
+            <RadioGroup
+                row
+                value={String(selectedOption)}
+                onChange={(event) => {
+                    const value = event.target.value === 'true';
+                    setSelectedOption(value);
+                }}
+            >
                 {options.map((option) => (
-                    <div
-                        key={option.value}
-                        style={{ margin: 3, padding: 0, display: "flex", alignItems: "center" }}
-                    >
-                        <input
-                            type="radio"
-                            id={option.value.toString()}
-                            value={option.value}
-                            checked={selectedOption === option.value}
-                            onChange={(event) => {
-                                const value = event.target.value === 'true';
-                                setSelectedOption(value);
-                            }}
-                            disabled={disabled}
-                        />
-                        <label htmlFor={option.value} style={{ marginLeft: 5 }}>
-                            {option.label}
-                        </label>
-                    </div>
+                    <FormControlLabel
+                        key={String(option.value)}
+                        value={String(option.value)}
+                        control={<Radio size="small" disabled={disabled} />}
+                        label={option.label}
+                    />
                 ))}
-            </div>
-        </div>
+            </RadioGroup>
+        </FormControl>
     );
 
     return [selectedOption, RadioButtons, setSelectedOption];

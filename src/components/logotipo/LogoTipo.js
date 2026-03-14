@@ -1,20 +1,24 @@
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-// @mui
-// import { useTheme } from '@mui/material/styles';
+import { useSelector } from 'react-redux';
 import { Box, Link } from '@mui/material';
+import logo from 'assets/images/logo.svg';
+import logoWhite from 'assets/images/logo-white.svg';
 
 // ----------------------------------------------------------------------
 
-const Logotipo = forwardRef(({ disabledLink = false, sx}) => {
+const Logotipo = forwardRef(({ disabledLink = false, sx }) => {
+    const navType = useSelector((state) => state.customization.navType);
+
     const logotype = (
         <Box
             component="img"
-            src="images/logo.svg"
+            src={navType === 'dark' ? logoWhite : logo}
             sx={{ width: '15rem', cursor: 'pointer', ...sx }}
         />
-    )
+    );
+
     if (disabledLink) {
         return logotype;
     }
@@ -25,7 +29,6 @@ const Logotipo = forwardRef(({ disabledLink = false, sx}) => {
                 {logotype}
             </Link>
         </Box>
-
     );
 });
 

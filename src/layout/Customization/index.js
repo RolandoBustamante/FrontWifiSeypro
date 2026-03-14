@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
-import { IconSettings } from '@tabler/icons';
+import { IconSettings, IconMoon, IconSun } from '@tabler/icons';
 
 // third-party
 import PerfectScrollbar from 'react-perfect-scrollbar';
@@ -24,7 +24,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 // project imports
 import SubCard from 'ui-component/cards/SubCard';
 import AnimateButton from 'ui-component/extended/AnimateButton';
-import { SET_BORDER_RADIUS, SET_FONT_FAMILY } from 'store/actions';
+import { SET_BORDER_RADIUS, SET_FONT_FAMILY, SET_NAV_TYPE } from 'store/actions';
 import { gridSpacing } from 'store/constant';
 
 // concat 'px'
@@ -43,6 +43,15 @@ const Customization = () => {
   const [open, setOpen] = useState(false);
   const handleToggle = () => {
     setOpen(!open);
+  };
+
+  // state - nav type (light/dark)
+  const [navType, setNavType] = useState(customization.navType || 'light');
+  const handleNavType = (e) => {
+    const next = e.target.value;
+    setNavType(next);
+    localStorage.setItem('navType', next);
+    dispatch({ type: SET_NAV_TYPE, navType: next });
   };
 
   // state - border radius
@@ -130,6 +139,39 @@ const Customization = () => {
       >
         <PerfectScrollbar component="div">
           <Grid container spacing={gridSpacing} sx={{ p: 3 }}>
+            <Grid item xs={12}>
+              {/* dark/light mode */}
+              <SubCard title="Modo">
+                <FormControl>
+                  <RadioGroup value={navType} onChange={handleNavType}>
+                    <FormControlLabel
+                      value="light"
+                      control={<Radio />}
+                      label={
+                        <Grid container alignItems="center" spacing={0.5}>
+                          <Grid item sx={{ display: 'flex' }}>
+                            <IconSun size={18} stroke={1.5} />
+                          </Grid>
+                          <Grid item>Claro</Grid>
+                        </Grid>
+                      }
+                    />
+                    <FormControlLabel
+                      value="dark"
+                      control={<Radio />}
+                      label={
+                        <Grid container alignItems="center" spacing={0.5}>
+                          <Grid item sx={{ display: 'flex' }}>
+                            <IconMoon size={18} stroke={1.5} />
+                          </Grid>
+                          <Grid item>Oscuro</Grid>
+                        </Grid>
+                      }
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </SubCard>
+            </Grid>
             <Grid item xs={12}>
               {/* font family */}
               <SubCard title="Font Family">

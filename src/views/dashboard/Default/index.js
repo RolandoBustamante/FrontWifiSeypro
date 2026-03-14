@@ -362,7 +362,7 @@ const Dashboard = () => {
               <Box>
                 <Typography variant="h4">Ventas y cobranzas</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Ultimos 6 meses en base a operaciones emitidas y movimientos pagados.
+                  Ultimos 6 meses en base a recibos emitidos y recibos pagados.
                 </Typography>
               </Box>
               <Chart options={ventasChart.options} series={ventasChart.series} type="bar" height={330} />

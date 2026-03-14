@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {TextField, Autocomplete, FormControl} from '@mui/material';
+import {TextField, Autocomplete, FormControl, FormHelperText} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 export default function useSelectMulti({
                                            initialState = [],
@@ -10,6 +11,7 @@ export default function useSelectMulti({
                                            backgroundColor = '',
                                            placeholder = 'Seleccionar...',
                                        }) {
+    const theme = useTheme();
     const [value, setValue] = useState(optionsState.filter(element=> initialState.includes(element.value)));
     const [options, setOptions] = useState(optionsState);
     const [invalid, setInvalid] = useState(false);
@@ -23,7 +25,7 @@ export default function useSelectMulti({
         }
     },[options, valuesFilter])
     const selectElement = (
-        <FormControl fullWidth>
+        <FormControl fullWidth error={invalid}>
             <Autocomplete
                 multiple
                 id="autocomplete"
@@ -39,8 +41,9 @@ export default function useSelectMulti({
                         {...params}
                         label={placeholder}
                         placeholder={placeholder}
+                        error={invalid}
                         style={{
-                            backgroundColor: invalid ? '#dc3545' : backgroundColor,
+                            backgroundColor: invalid ? theme.palette.error.light : backgroundColor,
                             borderRadius: 5,
                         }}
                     />
@@ -51,7 +54,9 @@ export default function useSelectMulti({
                     </li>
                 )}
             />
-            {invalid ? <small className="text-danger">{message===''? `Debe seleccionar ${placeholder}`:message}</small> : null}
+            {invalid && (
+                <FormHelperText>{message===''? `Debe seleccionar ${placeholder}`:message}</FormHelperText>
+            )}
         </FormControl>
     );
 
