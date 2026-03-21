@@ -18,6 +18,7 @@ export default function useAsyncSelect({
   const [dis, setDisabled] = useState(disabled);
   const requestIdRef = useRef(0);
   const mountedRef = useRef(true);
+  const { Model, respuesta, table, getByParam } = modelo;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -33,7 +34,6 @@ export default function useAsyncSelect({
     requestIdRef.current = currentRequestId;
 
     const timer = setTimeout(() => {
-      const { Model, respuesta, table, getByParam } = modelo;
       if (!Model || !respuesta) return;
 
       const getByParamFunc = getByParam || 'getByParam';
@@ -52,7 +52,7 @@ export default function useAsyncSelect({
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [textValue, modelo]);
+  }, [textValue, Model, respuesta, table, getByParam]);
 
   const renderOption = (props, option) => (
     <li {...props}>

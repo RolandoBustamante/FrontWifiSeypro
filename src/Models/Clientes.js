@@ -63,6 +63,26 @@ const Clientes={
         `)
         return client.query({query,variables:{param}, fetchPolicy: 'no-cache'})
     },
+    resumenPorDocumento: (documento_identidad)=>{
+        const query= gql(`
+        query resumenClientePorDocumento($documento_identidad: String!){
+            resumenClientePorDocumento(documento_identidad: $documento_identidad){
+            data
+           }
+        }
+        `)
+        return client.query({query,variables:{documento_identidad}, fetchPolicy: 'no-cache'})
+    },
+    resumenPorId: (id)=>{
+        const query= gql(`
+        query resumenClientePorId($id: String!){
+            resumenClientePorId(id: $id){
+            data
+           }
+        }
+        `)
+        return client.query({query,variables:{id}, fetchPolicy: 'no-cache'})
+    },
     obtenerRecurso: (driveId)=>{
         const query= gql(`
         query obtenerDrive($driveId: String!){

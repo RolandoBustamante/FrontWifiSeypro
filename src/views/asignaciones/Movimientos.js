@@ -29,6 +29,16 @@ const formatMotivo = (value = "") => {
   }
   return formatLabel(raw);
 };
+const formatPersona = (persona) =>
+  [persona?.nombres, persona?.apellidos].filter(Boolean).join(" ").trim() || "-";
+const formatDetalle = (row) => {
+  const chips = Array.isArray(row?.router?.chips) ? row.router.chips : [];
+  const sim = chips?.[0]?.sim_card;
+  const motivo = formatMotivo(row?.motivo);
+  return [sim ? `SIM ${sim}` : null, motivo !== "-" ? motivo : null]
+    .filter(Boolean)
+    .join(" | ") || "-";
+};
 const TIPO_LABEL = {
   TRASLADO_SEDE: "Traslado sede",
   ASIGNACION_REPARTIDOR: "Asignacion repartidor",
@@ -222,9 +232,38 @@ const Movimientos = () => {
                       ),
                     },
                     { header: "Router", align: "center", Cell: (row) => row?.router?.imei || "-" },
-                    { header: "Origen", align: "center", Cell: (row) => row?.sede_origen?.nombre || row?.usuario_origen?.nombres || "-" },
-                    { header: "Destino", align: "center", Cell: (row) => row?.sede_destino?.nombre || row?.usuario_destino?.nombres || row?.cliente_destino?.nombres || "-" },
-                    { header: "Motivo", align: "center", Cell: (row) => formatMotivo(row?.motivo) },
+                    {
+                      header: "Ejecutado por",
+                      align: "center",
+                      cellStyle: { minWidth: "180px", whiteSpace: "normal" },
+                      Cell: (row) => formatPersona(row?.ejecutado_por),
+                    },
+                    {
+                      header: "Repartidor origen",
+                      align: "center",
+                      cellStyle: { minWidth: "180px", whiteSpace: "normal" },
+                      Cell: (row) => formatPersona(row?.usuario_origen),
+                    },
+                    {
+                      header: "Repartidor destino",
+                      align: "center",
+                      cellStyle: { minWidth: "180px", whiteSpace: "normal" },
+                      Cell: (row) => formatPersona(row?.usuario_destino),
+                    },
+                    { header: "Sede origen", align: "center", Cell: (row) => row?.sede_origen?.nombre || "-" },
+                    { header: "Sede destino", align: "center", Cell: (row) => row?.sede_destino?.nombre || "-" },
+                    {
+                      header: "Cliente",
+                      align: "center",
+                      cellStyle: { minWidth: "220px", whiteSpace: "normal" },
+                      Cell: (row) => row?.cliente_destino?.nombres || "-",
+                    },
+                    {
+                      header: "Detalle",
+                      align: "center",
+                      cellStyle: { minWidth: "260px", whiteSpace: "normal" },
+                      Cell: (row) => formatDetalle(row),
+                    },
                   ]}
                 />
               </Stack>

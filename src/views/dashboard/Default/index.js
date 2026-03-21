@@ -146,6 +146,7 @@ const Dashboard = () => {
   const resumen = dashboard?.resumen ?? {};
   const estadosRouters = dashboard?.estadosRouters ?? [];
   const actividadReciente = dashboard?.actividadReciente ?? [];
+  const morosos = dashboard?.morosos ?? [];
   const ventasMensuales = dashboard?.series?.ventasMensuales ?? [];
   const altasMensuales = dashboard?.series?.altasMensuales ?? [];
   const cobranzasMensuales = dashboard?.series?.cobranzasMensuales ?? [];
@@ -461,7 +462,52 @@ const Dashboard = () => {
           </MainCard>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} lg={6}>
+          <MainCard border={false}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="h4">Morosos</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Clientes con deuda pendiente priorizados por mayor monto.
+                </Typography>
+              </Box>
+              <Stack spacing={1.25}>
+                {morosos.length === 0 && (
+                  <Typography variant="body2" color="text.secondary">
+                    No hay morosos registrados para la sede actual.
+                  </Typography>
+                )}
+                {morosos.map((item) => (
+                  <Stack
+                    key={item.clienteId}
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                    sx={{ py: 0.75 }}
+                  >
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="subtitle2" noWrap>
+                        {item.nombres}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {item.documento} | {formatNumber(item.cuotasPendientes)} cuotas
+                      </Typography>
+                    </Box>
+                    <Stack alignItems="flex-end" spacing={0.5}>
+                      <Label color="error">{formatCurrency(item.totalDeuda)}</Label>
+                      <Typography variant="caption" color="text.secondary">
+                        Desde {moment(item.deudaMasAntigua).format('YYYY-MM-DD')}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+          </MainCard>
+        </Grid>
+
+        <Grid item xs={12} lg={6}>
           <MainCard border={false}>
             <Stack spacing={2.5}>
               <Box>

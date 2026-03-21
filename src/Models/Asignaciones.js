@@ -138,6 +138,17 @@ const Asignaciones = {
     `);
     return client.mutate({ mutation, variables: { data }, fetchPolicy: "no-cache" });
   },
+  recogerRouterPorAsignar: (data) => {
+    const mutation = gql(`
+      mutation recogerRouterPorAsignar($data: JSONObject!) {
+        recogerRouterPorAsignar(data: $data) {
+          success
+          data
+        }
+      }
+    `);
+    return client.mutate({ mutation, variables: { data }, fetchPolicy: "no-cache" });
+  },
   recogerRouterCliente: (data) => {
     const mutation = gql(`
       mutation recogerRouterCliente($data: JSONObject!) {

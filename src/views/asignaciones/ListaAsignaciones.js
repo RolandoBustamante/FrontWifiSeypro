@@ -35,6 +35,7 @@ import useMountedRef from "../../customHooks/useMountedRef";
 
 const fDate = (v) => (v ? new Date(v).toLocaleString("es-PE") : "-");
 const TIPOS_CELULAR = ["Whatsapp", "Llamadas", "Principal", "Secundario", "Otro", "Completo"];
+const MOTIVOS_RECOJO_PENDIENTE = ["CAMBIO", "BAJA", "DESISTIO"];
 const getDniPendiente = (nota = "") => {
   const match = String(nota).match(/PENDIENTE_CLIENTE_DNI:([^\s|]+)/);
   return match?.[1] ?? "";
@@ -100,7 +101,9 @@ const ListaAsignaciones = () => {
     celular: "",
     celular_tipo: "Principal",
   });
+  const [clienteDocumentoInfo, setClienteDocumentoInfo] = useState(null);
   const [dniRef, setDniRef] = useState("");
+  const [dniReferenciaInfo, setDniReferenciaInfo] = useState(null);
   const [fechaInicio, setFechaInicio] = useState("");
   const [direccionServicio, setDireccionServicio] = useState("");
   const [motivoEntrega, setMotivoEntrega] = useState("");
@@ -108,6 +111,9 @@ const ListaAsignaciones = () => {
   const [devolverOpen, setDevolverOpen] = useState(false);
   const [sedeDestino, selectSedeDestino, setSedeDestino, , setOptsSedeDestino] = useSelect({ placeholder: "Sede destino" });
   const [motivoDev, setMotivoDev] = useState("");
+  const [recogerPendienteOpen, setRecogerPendienteOpen] = useState(false);
+  const [motivoRecojoPendiente, setMotivoRecojoPendiente] = useState("CAMBIO");
+  const [notaRecojoPendiente, setNotaRecojoPendiente] = useState("");
 
   const [reasignarOpen, setReasignarOpen] = useState(false);
   const [repartidorNuevoId, selectRepartidorNuevo, setRepartidorNuevoId, , setOptsRepartidorNuevo] = useAsyncSelect({
@@ -187,11 +193,13 @@ const ListaAsignaciones = () => {
       celular: "",
       celular_tipo: "Principal",
     });
+    setClienteDocumentoInfo(null);
     setDepRapido("");
     setProvRapido("");
     setDistRapido("");
     setOptsCliente([]);
     setDniRef("");
+    setDniReferenciaInfo(null);
     setFechaInicio("");
     setDireccionServicio("");
     setMotivoEntrega("");
@@ -205,6 +213,18 @@ const ListaAsignaciones = () => {
     const esModoPorAsignar = !esRegularizacion && modoEntrega === "POR_ASIGNAR";
     if (esModoPorAsignar) {
       if (!dniRef) return Toast.Warning("Ingresa DNI referencia");
+      const infoDniReferencia = await validarDocumentoReferencia(dniRef);
+      if (infoDniReferencia?.existe) {
+        const deudaVencida = Number(infoDniReferencia?.montoVencido ?? 0);
+        const deudaAbierta = Number(infoDniReferencia?.montoPendiente ?? 0);
+        return Toast.Warning(
+          deudaVencida > 0
+            ? `Este documento ya pertenece a un cliente registrado con deuda vencida de S/ ${deudaVencida.toFixed(2)}. Usa la opcion Con cliente.`
+            : deudaAbierta > 0
+              ? `Este documento ya pertenece a un cliente registrado con deuda abierta de S/ ${deudaAbierta.toFixed(2)}. Usa la opcion Con cliente.`
+              : "Este documento ya pertenece a un cliente registrado. Usa la opcion Con cliente."
+        );
+      }
       data.modo = "POR_ASIGNAR";
       data.dni_referencia = dniRef;
     } else {
@@ -212,6 +232,17 @@ const ListaAsignaciones = () => {
         data.cliente = clienteRapidoData;
       } else {
         if (!clienteId) return Toast.Warning("Selecciona cliente");
+        const infoCliente = await validarClienteSeleccionado(clienteId);
+        if (infoCliente?.existe) {
+          const deudaVencida = Number(infoCliente?.montoVencido ?? 0);
+          const deudaAbierta = Number(infoCliente?.montoPendiente ?? 0);
+          if (deudaVencida > 0) {
+            return Toast.Warning(`El cliente seleccionado tiene deuda vencida de S/ ${deudaVencida.toFixed(2)}`);
+          }
+          if (deudaAbierta > 0) {
+            return Toast.Warning(`El cliente seleccionado tiene deuda pendiente de S/ ${deudaAbierta.toFixed(2)}`);
+          }
+        }
         data.cliente_id = clienteId;
       }
       data.fecha_inicio = fechaInicio || new Date().toISOString().slice(0, 10);
@@ -235,9 +266,83 @@ const ListaAsignaciones = () => {
     }
   };
 
-  const onGuardarClienteRapido = () => {
+  const usarClienteExistente = () => {
+    if (!clienteDocumentoInfo?.cliente?.id) return;
+    setClienteId(clienteDocumentoInfo.cliente.id);
+    setClienteRapidoData(null);
+    setOptsCliente([
+      {
+        value: clienteDocumentoInfo.cliente.id,
+        label: `${clienteDocumentoInfo.cliente.documento_identidad ?? "-"} - ${clienteDocumentoInfo.cliente.nombres}`,
+      },
+    ]);
+    setClienteRapidoOpen(false);
+    Toast.Warning("Se usara el cliente ya registrado");
+  };
+
+  const validarDocumentoClienteRapido = async (documentoParam) => {
+    const documento = String(documentoParam ?? clienteForm.documento_identidad ?? "").trim();
+    if (!documento) {
+      setClienteDocumentoInfo(null);
+      return null;
+    }
+    try {
+      const response = await Clientes.resumenPorDocumento(documento);
+      if (!mountedRef.current) return null;
+      const info = response?.data?.resumenClientePorDocumento?.data ?? null;
+      setClienteDocumentoInfo(info);
+      return info;
+    } catch (e) {
+      if (mountedRef.current) setClienteDocumentoInfo(null);
+      return null;
+    }
+  };
+
+  const validarDocumentoReferencia = async (documentoParam) => {
+    const documento = String(documentoParam ?? dniRef ?? "").trim();
+    if (!documento) {
+      setDniReferenciaInfo(null);
+      return null;
+    }
+    try {
+      const response = await Clientes.resumenPorDocumento(documento);
+      if (!mountedRef.current) return null;
+      const info = response?.data?.resumenClientePorDocumento?.data ?? null;
+      setDniReferenciaInfo(info);
+      return info;
+    } catch (e) {
+      if (mountedRef.current) setDniReferenciaInfo(null);
+      return null;
+    }
+  };
+
+  const validarClienteSeleccionado = async (clienteIdParam) => {
+    const id = String(clienteIdParam ?? clienteId ?? "").trim();
+    if (!id) return null;
+    try {
+      const response = await Clientes.resumenPorId(id);
+      return response?.data?.resumenClientePorId?.data ?? null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const onGuardarClienteRapido = async () => {
     if (!clienteForm.nombres || !depRapido || !provRapido || !distRapido) {
       return Toast.Warning("Completa datos minimos del cliente");
+    }
+    const infoDocumento = await validarDocumentoClienteRapido(clienteForm.documento_identidad);
+    if (infoDocumento?.existe) {
+      const deudaVencida = Number(infoDocumento?.montoVencido ?? 0);
+      const deudaAbierta = Number(infoDocumento?.montoPendiente ?? 0);
+      if (deudaVencida > 0) {
+        return Toast.Warning(`Este cliente ya esta registrado y tiene una deuda vencida de S/ ${deudaVencida.toFixed(2)}`);
+      }
+      return Toast.Warning(
+        deudaAbierta > 0
+          ? `Este cliente ya esta registrado y tiene una deuda abierta de S/ ${deudaAbierta.toFixed(2)}`
+          : "Este cliente ya esta registrado"
+      );
     }
     setClienteRapidoData({
       ...clienteForm,
@@ -255,11 +360,28 @@ const ListaAsignaciones = () => {
     if (!clienteForm.documento_identidad) return Toast.Warning("Ingresa documento");
     Toast.Waiting("Buscando documento...");
     try {
-      const response = await Usuario.consultDNIRUC(clienteForm.documento_identidad);
+      const [response, resumenResponse] = await Promise.all([
+        Usuario.consultDNIRUC(clienteForm.documento_identidad),
+        Clientes.resumenPorDocumento(clienteForm.documento_identidad),
+      ]);
       if (!mountedRef.current) return;
       const payload = response?.data?.consultDNIRUC?.data ?? {};
+      const info = resumenResponse?.data?.resumenClientePorDocumento?.data ?? null;
+      setClienteDocumentoInfo(info);
       if (!payload.success) {
         Toast.Remove();
+        if (info?.existe) {
+          const deudaVencida = Number(info?.montoVencido ?? 0);
+          const deudaAbierta = Number(info?.montoPendiente ?? 0);
+          Toast.Warning(
+            deudaVencida > 0
+              ? `Cliente ya registrado con deuda vencida de S/ ${deudaVencida.toFixed(2)}`
+              : deudaAbierta > 0
+                ? `Cliente ya registrado con deuda abierta de S/ ${deudaAbierta.toFixed(2)}`
+                : "Cliente ya registrado"
+          );
+          return;
+        }
         Toast.Warning(payload?.data?.error ?? "No se encontraron datos");
         return;
       }
@@ -338,6 +460,26 @@ const ListaAsignaciones = () => {
     } catch (e) {
       Toast.Remove();
       Toast.Error(e?.message || "No se pudo devolver");
+    }
+  };
+
+  const onRecogerPendiente = async () => {
+    if (!asigTarget?.id) return;
+    if (!motivoRecojoPendiente) return Toast.Warning("Selecciona motivo");
+    Toast.Waiting("Registrando recojo...");
+    try {
+      await Asignaciones.recogerRouterPorAsignar({
+        asignacion_id: asigTarget.id,
+        motivo: motivoRecojoPendiente,
+        nota: notaRecojoPendiente || null,
+      });
+      Toast.Remove();
+      Toast.Success("Router recogido y devuelto a reparto");
+      setRecogerPendienteOpen(false);
+      loadAsignaciones().then();
+    } catch (e) {
+      Toast.Remove();
+      Toast.Error(e?.message || "No se pudo registrar");
     }
   };
 
@@ -481,9 +623,23 @@ const ListaAsignaciones = () => {
                     header: "Acciones",
                     align: "center",
                     Cell: (row) => (
-                      <Button size="small" variant="contained" onClick={() => openEntrega(row)}>
-                        Registrar cliente
-                      </Button>
+                      <Stack direction="row" spacing={1} justifyContent="center">
+                        <Button size="small" variant="contained" onClick={() => openEntrega(row)}>
+                          Registrar cliente
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setAsigTarget(row);
+                            setMotivoRecojoPendiente("CAMBIO");
+                            setNotaRecojoPendiente("");
+                            setRecogerPendienteOpen(true);
+                          }}
+                        >
+                          Recoger
+                        </Button>
+                      </Stack>
                     ),
                   },
                   { header: "Router", align: "center", Cell: (row) => row?.router?.imei || "-" },
@@ -510,7 +666,27 @@ const ListaAsignaciones = () => {
               </TextField>
             )}
             {asigTarget?.activa && modoEntrega === "POR_ASIGNAR" ? (
-              <TextField fullWidth label="DNI referencia" value={dniRef} onChange={(e) => setDniRef(e.target.value)} />
+              <>
+                <TextField
+                  fullWidth
+                  label="DNI referencia"
+                  value={dniRef}
+                  onChange={(e) => {
+                    setDniRef(e.target.value);
+                    setDniReferenciaInfo(null);
+                  }}
+                  onBlur={() => validarDocumentoReferencia(dniRef)}
+                />
+                {dniReferenciaInfo?.existe && (
+                  <Alert severity={Number(dniReferenciaInfo?.montoVencido ?? 0) > 0 ? "warning" : "info"}>
+                    {Number(dniReferenciaInfo?.montoVencido ?? 0) > 0
+                      ? `Este documento ya pertenece a un cliente registrado con deuda vencida de S/ ${Number(dniReferenciaInfo?.montoVencido ?? 0).toFixed(2)}. Usa la opcion Con cliente.`
+                      : Number(dniReferenciaInfo?.montoPendiente ?? 0) > 0
+                        ? `Este documento ya pertenece a un cliente registrado con deuda abierta de S/ ${Number(dniReferenciaInfo?.montoPendiente ?? 0).toFixed(2)}. Usa la opcion Con cliente.`
+                        : "Este documento ya pertenece a un cliente registrado. Usa la opcion Con cliente."}
+                  </Alert>
+                )}
+              </>
             ) : (
               <>
                 <FormControl fullWidth>{selectCliente}</FormControl>
@@ -543,7 +719,11 @@ const ListaAsignaciones = () => {
                   fullWidth
                   label="Documento de identidad"
                   value={clienteForm.documento_identidad}
-                  onChange={(e) => setClienteForm((p) => ({ ...p, documento_identidad: e.target.value }))}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setClienteForm((p) => ({ ...p, documento_identidad: value }));
+                    setClienteDocumentoInfo(null);
+                  }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -555,6 +735,24 @@ const ListaAsignaciones = () => {
                   }}
                 />
               </Grid>
+              {clienteDocumentoInfo?.existe && (
+                <Grid item xs={12}>
+                  <Alert
+                    severity={Number(clienteDocumentoInfo?.montoVencido ?? 0) > 0 ? "warning" : "info"}
+                    action={
+                      <Button color="inherit" size="small" onClick={usarClienteExistente}>
+                        Usar cliente
+                      </Button>
+                    }
+                  >
+                    {Number(clienteDocumentoInfo?.montoVencido ?? 0) > 0
+                      ? `Este cliente ya esta registrado y tiene una deuda vencida de S/ ${Number(clienteDocumentoInfo?.montoVencido ?? 0).toFixed(2)}.`
+                      : Number(clienteDocumentoInfo?.montoPendiente ?? 0) > 0
+                        ? `Este cliente ya esta registrado y tiene una deuda abierta de S/ ${Number(clienteDocumentoInfo?.montoPendiente ?? 0).toFixed(2)}.`
+                        : "Este cliente ya esta registrado."}
+                  </Alert>
+                </Grid>
+              )}
               <Grid item xs={12} md={6}>
                 <TextField fullWidth label="Nombres" value={clienteForm.nombres} onChange={(e) => setClienteForm((p) => ({ ...p, nombres: e.target.value }))} />
               </Grid>
@@ -614,6 +812,33 @@ const ListaAsignaciones = () => {
         <DialogActions>
           <Button onClick={() => setDevolverOpen(false)}>Cancelar</Button>
           <Button variant="contained" onClick={onDevolver}>Confirmar</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={recogerPendienteOpen} onClose={() => setRecogerPendienteOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Recoger Entrega Pendiente</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <TextField fullWidth disabled label="Router" value={asigTarget?.router?.imei || ""} />
+            <TextField fullWidth disabled label="DNI referencia" value={getDniPendiente(asigTarget?.nota) || ""} />
+            <TextField
+              fullWidth
+              select
+              label="Motivo"
+              value={motivoRecojoPendiente}
+              onChange={(e) => setMotivoRecojoPendiente(e.target.value)}
+              SelectProps={{ native: true }}
+            >
+              {MOTIVOS_RECOJO_PENDIENTE.map((item) => (
+                <option key={item} value={item}>{formatEstado(item)}</option>
+              ))}
+            </TextField>
+            <TextField fullWidth label="Nota" value={notaRecojoPendiente} onChange={(e) => setNotaRecojoPendiente(e.target.value)} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRecogerPendienteOpen(false)}>Cancelar</Button>
+          <Button variant="contained" onClick={onRecogerPendiente}>Confirmar</Button>
         </DialogActions>
       </Dialog>
 

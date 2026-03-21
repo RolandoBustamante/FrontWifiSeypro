@@ -15,6 +15,18 @@ import Toast from "../../../utils/toastUtil";
 
 
 const Rastreador = () => {
+    const estadoLabels = {
+        EN_ENVIO: 'En envio',
+        POR_ASIGNAR: 'Por asignar',
+        NODEVUELTO: 'No devuelto'
+    }
+    const formatEstado = (value = '') =>
+        estadoLabels[String(value).toUpperCase()] ||
+        String(value)
+            .toLowerCase()
+            .replaceAll('_', ' ')
+            .replace(/\b\w/g, (c) => c.toUpperCase())
+
     const colorState = {
         ACTIVO: 'success',
         LIBRE: 'primary',
@@ -22,7 +34,8 @@ const Rastreador = () => {
         POR_ASIGNAR: 'secondary',
         USADO: 'warning',
         ELIMINADO: 'error',
-        DEVUELTO: '#8f2ebd'
+        DEVUELTO: '#8f2ebd',
+        NODEVUELTO: 'error'
     };
     const {sesion} = useAuthContext()
 
@@ -280,7 +293,7 @@ const Rastreador = () => {
                                 const {estado} = row
                                 return (<Label variant="soft" color={colorState[estado.toUpperCase()]}
                                                sx={{textTransform: 'capitalize'}}>
-                                    {estado}
+                                    {formatEstado(estado)}
                                 </Label>)
                             },
                             align: "center",
