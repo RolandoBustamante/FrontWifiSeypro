@@ -80,6 +80,7 @@ const MainLayout = ({viewHeader = false}) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const PENDIENTES_DIALOG_KEY = 'pendientesCobroDialogAt';
     const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+    const isRepartidor = Boolean(sesion?.rol?.es_repartidor);
 
     const parseDetallesJson = (detallesJson) => {
         if (!detallesJson) return {items: [], mostrar: false};
@@ -117,12 +118,17 @@ const MainLayout = ({viewHeader = false}) => {
 
     useEffect(() => {
         if (!sesion) return;
+        if (isRepartidor) {
+            setPendientes([]);
+            setDialogOpen(false);
+            return;
+        }
         fetchPendientes().then(r => r);
         const id = setInterval(() => {
             fetchPendientes().then(r => r);
         }, SIX_HOURS_MS);
         return () => clearInterval(id);
-    }, [fetchPendientes, sesion]);
+    }, [fetchPendientes, sesion, isRepartidor]);
     // Handle left drawer
     const leftDrawerOpened = useSelector((state) => state.customization.opened);
     const dispatch = useDispatch();
@@ -147,8 +153,8 @@ const MainLayout = ({viewHeader = false}) => {
                 <Toolbar>
                     <Header
                         handleLeftDrawerToggle={handleLeftDrawerToggle}
-                        pendingCount={pendientes.length}
-                        onOpenPendingDialog={() => setDialogOpen(true)}
+                        pendingCount={isRepartidor ? 0 : pendientes.length}
+                        onOpenPendingDialog={isRepartidor ? undefined : () => setDialogOpen(true)}
                     />
                 </Toolbar>
             </AppBar>
@@ -164,11 +170,13 @@ const MainLayout = ({viewHeader = false}) => {
                     <Breadcrumbs separator={IconChevronRight} navigation={navegacion} icon title rightAlign/>}
                 <Outlet/>
             </Main>
-            <PendientesCobroDialog
-                open={dialogOpen}
-                onClose={() => setDialogOpen(false)}
-                items={pendientes}
-            />
+            {!isRepartidor && (
+                <PendientesCobroDialog
+                    open={dialogOpen}
+                    onClose={() => setDialogOpen(false)}
+                    items={pendientes}
+                />
+            )}
             <Customization/>
         </Box>
     );

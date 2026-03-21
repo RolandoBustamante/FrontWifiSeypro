@@ -209,6 +209,45 @@ const PendientesCobroDialog = ({open, onClose, items}) => {
     });
   }, [filteredItems, openRows]);
 
+  const groupedBySede = useMemo(() => {
+    return tableItems.reduce((acc, row) => {
+      const sede = row.movimientos?.[0]?.sede || 'Sin sede';
+      if (!acc[sede]) acc[sede] = [];
+      acc[sede].push(row);
+      return acc;
+    }, {});
+  }, [tableItems]);
+
+  const columns = [
+    {
+      header: '',
+      Cell: (row) => (
+        <IconButton size="small" onClick={() => handleToggleRow(row)}>
+          <Icon icon={openRows.has(row.cliente?.id || row.cliente_id) ? 'mdi:chevron-up' : 'mdi:chevron-down'} />
+        </IconButton>
+      ),
+      align: 'center',
+      cellStyle: {minWidth: '36px'}
+    },
+    {
+      header: 'Cliente',
+      Cell: (row) => row.cliente?.nombres || '-',
+      cellStyle: {minWidth: '260px'},
+      align: 'left'
+    },
+    {
+      header: 'Documento',
+      Cell: (row) => row.cliente?.documento || '-',
+      align: 'left'
+    },
+    {
+      header: 'Total deuda',
+      align: 'center',
+      cellStyle: {minWidth: '70px'},
+      Cell: (row) => `S/ ${Number(row.total_deuda || 0).toFixed(2)}`
+    }
+  ];
+
   return (
     <Dialog
       open={open}
@@ -241,45 +280,24 @@ const PendientesCobroDialog = ({open, onClose, items}) => {
             />
           </Box>
         </Stack>
-        <CustomTable
-          data={tableItems}
-          loading={false}
-          pagination={false}
-          columns={[
-            {
-              header: '',
-              Cell: (row) => (
-                <IconButton size="small" onClick={() => handleToggleRow(row)}>
-                  <Icon icon={openRows.has(row.cliente?.id || row.cliente_id) ? 'mdi:chevron-up' : 'mdi:chevron-down'} />
-                </IconButton>
-              ),
-              align: 'center',
-              cellStyle: {minWidth: '36px'}
-            },
-            {
-              header: 'Cliente',
-              Cell: (row) => row.cliente?.nombres || '-',
-              cellStyle: {minWidth: '260px'},
-              align: 'left'
-            },
-            {
-              header: 'Documento',
-              Cell: (row) => row.cliente?.documento || '-',
-              align: 'left'
-            },
-            {
-              header: 'Sede',
-              Cell: (row) => row.movimientos?.[0]?.sede || '-',
-              align: 'left'
-            },
-            {
-              header: 'Total deuda',
-              align: 'center',
-              cellStyle: {minWidth: '70px'},
-              Cell: (row) => `S/ ${Number(row.total_deuda || 0).toFixed(2)}`
-            }
-          ]}
-        />
+        <Stack spacing={2}>
+          {Object.entries(groupedBySede).map(([sede, sedeItems]) => (
+            <Box key={sede}>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 1}}>
+                <Typography variant="subtitle2">{sede}</Typography>
+                <Label variant="soft" color="warning">
+                  {sedeItems.length} clientes
+                </Label>
+              </Stack>
+              <CustomTable
+                data={sedeItems}
+                loading={false}
+                pagination={false}
+                columns={columns}
+              />
+            </Box>
+          ))}
+        </Stack>
       </DialogContent>
     </Dialog>
   );
