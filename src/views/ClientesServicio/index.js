@@ -147,6 +147,7 @@ const RastreadorRouters = () => {
               },
               { header: 'Cliente', accessor: 'nombres', align: 'center' },
               { header: 'DNI / RUC', accessor: 'documento_identidad', align: 'center' },
+              { header: 'Precio', accessor: 'precio_servicio', align: 'center' },
               { header: 'IMEI', accessor: 'imei', align: 'center' },
               { header: 'SIM-CARD', accessor: 'sim_card', align: 'center' },
               {

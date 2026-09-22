@@ -54,7 +54,19 @@ const ModalDireccionServicio = ({config, setConfig, cliente, setData}) => {
         min: 1,
         max: 31
     });
+    const [
+        precioServicio,
+        inputPrecioServicio,
+        setPrecioServicio,
+        setInvalidPrecioServicio
+    ] = useInput({
+        placeholder: "Precio del servicio",
+        typeState: "number",
+        min: 0
+    });
+
     useEffect(() => {
+        setPrecioServicio(cliente.precio_servicio ?? '')
         setDireccionServicio(cliente.direccion_servicio ?? '')
         setInicioServicio(cliente.fecha_inicio ?? '')
         setDiaCobro(cliente.diaPago ?? '')
@@ -113,8 +125,16 @@ const ModalDireccionServicio = ({config, setConfig, cliente, setData}) => {
             dayNum > 31;
         setInvalidDiaCobro(invalidDia);
 
-        setDisabledSave(invalidDir || invalidInicio || invalidDia);
-    }, [direccionServicio, inicioServicio, diaCobro]);
+        const precioNum = Number(precioServicio);
+        const invalidPrecio =
+            precioServicio === '' ||
+            precioServicio === null ||
+            isNaN(precioNum) ||
+            precioNum < 0;
+        setInvalidPrecioServicio(invalidPrecio);
+
+        setDisabledSave(invalidDir || invalidInicio || invalidDia || invalidPrecio);
+    }, [direccionServicio, inicioServicio, diaCobro, precioServicio]);
 
     const handleClose = () => {
         setConfig({...config, isOpen: false});
@@ -129,14 +149,15 @@ const ModalDireccionServicio = ({config, setConfig, cliente, setData}) => {
                 id: cliente.value,
                 direccion_servicio: direccionServicio,
                 fecha_inicio: inicioServicio,
-                diaPago: diaCobro
+                diaPago: diaCobro,
+                precio_servicio: precioServicio
             })
                 .then(() => {
                     setData(prev =>
                         prev.map(element =>
                             element.value === cliente.value
                                 ? {...element, direccion_servicio: direccionServicio, fecha_inicio: inicioServicio,
-                                    diaPago: diaCobro }
+                                    diaPago: diaCobro, precio_servicio: precioServicio }
                                 : element
                         )
                     );
@@ -179,6 +200,10 @@ const ModalDireccionServicio = ({config, setConfig, cliente, setData}) => {
 
                     <FormControl sx={{flex: 1}}>
                         {inputDiaCobro}
+                    </FormControl>
+
+                    <FormControl sx={{flex: 1}}>
+                        {inputPrecioServicio}
                     </FormControl>
                 </Stack>
             </DialogContent>
